@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.example.podder.core.Action
 
 sealed class PodcastUiState {
     data object Loading : PodcastUiState()
@@ -15,20 +16,31 @@ sealed class PodcastUiState {
     data class Error(val message: String) : PodcastUiState()
 }
 
-class PodcastViewModel : ViewModel() {
-    private val repository = PodcastRepository()
+sealed class PodcastAction : Action {
+    data class FetchPodcast(override val source: String, override val timestamp: Long, val url: String) : PodcastAction()
+}
 
+class PodcastViewModel(private val podcastUseCase: PodcastUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow<PodcastUiState>(PodcastUiState.Loading)
     val uiState: StateFlow<PodcastUiState> = _uiState.asStateFlow()
 
     init {
-        fetchPodcast("https://feeds.npr.org/510318/podcast.xml")
+        processAction(PodcastAction.FetchPodcast(url = "https://feeds.npr.org/510318/podcast.xml", source = "init", timestamp = System.currentTimeMillis()))
     }
 
-    fun fetchPodcast(url: String) {
+    fun processAction(action: PodcastAction) {
+        // Log the action (as per GEMINI.md)
+        println("Action received: ${action.javaClass.simpleName} from ${action.source} at ${action.timestamp}")
+
+        when (action) {
+            is PodcastAction.FetchPodcast -> handleFetchPodcast(action.url)
+        }
+    }
+
+    private fun handleFetchPodcast(url: String) {
         viewModelScope.launch {
             _uiState.value = PodcastUiState.Loading
-            val podcast = repository.getPodcast(url)
+            val podcast = podcastUseCase.getPodcast(url)
             _uiState.value = if (podcast != null) {
                 PodcastUiState.Success(podcast)
             } else {

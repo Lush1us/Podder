@@ -28,7 +28,7 @@ import com.example.podder.ui.screens.PodcastViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: PodcastViewModel = viewModel(),
+    viewModel: PodcastViewModel,
     onEpisodeClick: (Episode) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
