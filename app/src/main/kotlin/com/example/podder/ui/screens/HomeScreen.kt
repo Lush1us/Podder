@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import android.content.Intent
 import com.example.podder.player.PodcastPlayerService
 import com.example.podder.parser.Episode
+import com.example.podder.parser.Podcast
 import com.example.podder.ui.components.PlayerControls
 import com.example.podder.ui.screens.PodcastUiState
 import com.example.podder.ui.screens.PodcastViewModel
@@ -39,6 +40,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.IntentFilter
 import androidx.compose.runtime.DisposableEffect
+import com.example.podder.core.PodcastAction
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +53,7 @@ fun HomeScreen(
     var currentProgress by remember { mutableStateOf(0f) }
     var currentEpisodeTitle by remember { mutableStateOf("No episode playing") }
     var playerVisible by remember { mutableStateOf(false) }
+    var selectedPodcast by remember { mutableStateOf<Podcast?>(null) }
 
     DisposableEffect(Unit) {
         val playbackStateReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -97,30 +100,42 @@ fun HomeScreen(
                         )
                     }
                     is PodcastUiState.Success -> {
-                        LazyColumn {
-                            item {
-                                Text(
-                                    text = state.podcast.title,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    modifier = Modifier.padding(16.dp)
-                                )
+                        if (selectedPodcast == null) {
+                            LazyColumn {
+                                items(state.podcasts) { podcast ->
+                                    ListItem(
+                                        headlineContent = { Text(podcast.title) },
+                                        modifier = Modifier.clickable { selectedPodcast = podcast }
+                                    )
+                                    HorizontalDivider()
+                                }
                             }
-                            items(state.podcast.episodes) { episode ->
-                                ListItem(
-                                    headlineContent = { Text(episode.title) },
-                                    supportingContent = { Text(episode.description ?: "", maxLines = 2) },
-                                    modifier = Modifier.clickable {
-                                        episode.audioUrl?.let { url ->
-                                            val intent = Intent(context, PodcastPlayerService::class.java)
-                                            intent.action = PodcastPlayerService.ACTION_PLAY
-                                            intent.putExtra(PodcastPlayerService.EPISODE_URL, url)
-                                            intent.putExtra(PodcastPlayerService.EXTRA_EPISODE_TITLE, episode.title)
-                                            context.startService(intent)
-                                            playerVisible = true
+                        } else {
+                            LazyColumn {
+                                item {
+                                    Text(
+                                        text = selectedPodcast!!.title,
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
+                                items(selectedPodcast!!.episodes) { episode ->
+                                    ListItem(
+                                        headlineContent = { Text(episode.title) },
+                                        supportingContent = { Text(episode.description ?: "", maxLines = 2) },
+                                        modifier = Modifier.clickable {
+                                            episode.audioUrl?.let { url ->
+                                                val intent = Intent(context, PodcastPlayerService::class.java)
+                                                intent.action = PodcastPlayerService.ACTION_PLAY
+                                                intent.putExtra(PodcastPlayerService.EPISODE_URL, url)
+                                                intent.putExtra(PodcastPlayerService.EXTRA_EPISODE_TITLE, episode.title)
+                                                context.startService(intent)
+                                                playerVisible = true
+                                            }
                                         }
-                                    }
-                                )
-                                HorizontalDivider()
+                                    )
+                                    HorizontalDivider()
+                                }
                             }
                         }
                     }
