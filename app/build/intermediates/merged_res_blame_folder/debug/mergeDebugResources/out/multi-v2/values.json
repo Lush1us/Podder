@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.podder.app-mergeDebugResources-39:/values/values.xml",
+            "outputFile": "com.example.podder.app-mergeDebugResources-41:/values/values.xml",
             "map": [
                 {
                     "source": "/home/Lush1us/.gradle/caches/9.3.0/transforms/cac7e99b09c2be2fd7433e6e90e40ba1/transformed/navigation-runtime-2.8.5/res/values/values.xml",
@@ -71,23 +71,6 @@
                         "startOffsets": "9212,9282,9344,9409,9473,9550,9615,9705,9789",
                         "endColumns": "69,61,64,63,76,64,89,83,68",
                         "endOffsets": "9277,9339,9404,9468,9545,9610,9700,9784,9853"
-                    }
-                },
-                {
-                    "source": "/home/Lush1us/.gradle/caches/9.3.0/transforms/92cd05f7f9c6cf0d7d3d8b33d903cb8f/transformed/activity-1.8.2/res/values/values.xml",
-                    "from": {
-                        "startLines": "2,3",
-                        "startColumns": "4,4",
-                        "startOffsets": "55,97",
-                        "endColumns": "41,59",
-                        "endOffsets": "92,152"
-                    },
-                    "to": {
-                        "startLines": "84,103",
-                        "startColumns": "4,4",
-                        "startOffsets": "5325,6312",
-                        "endColumns": "41,59",
-                        "endOffsets": "5362,6367"
                     }
                 },
                 {
@@ -285,6 +268,23 @@
                         "startOffsets": "633,722,793,2332,5143,6529,7557,7790,7879,7952,8048,8143,8226,8310,8391,8476,8556,8620,8714,8793,8887,8961,9052,9124,15112,15180,15246,15322,15404,15491,17932,18108,18230,18492,18687",
                         "endColumns": "88,70,72,98,61,59,73,88,72,95,94,82,83,80,84,79,63,93,78,93,73,90,71,87,67,65,75,81,86,94,65,121,60,65,66",
                         "endOffsets": "717,788,861,2426,5200,6584,7626,7874,7947,8043,8138,8221,8305,8386,8471,8551,8615,8709,8788,8882,8956,9047,9119,9207,15175,15241,15317,15399,15486,15581,17993,18225,18286,18553,18749"
+                    }
+                },
+                {
+                    "source": "/home/Lush1us/.gradle/caches/9.3.0/transforms/23353d6a619fe426505d19d4eb68f408/transformed/activity-1.7.1/res/values/values.xml",
+                    "from": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,97",
+                        "endColumns": "41,59",
+                        "endOffsets": "92,152"
+                    },
+                    "to": {
+                        "startLines": "84,103",
+                        "startColumns": "4,4",
+                        "startOffsets": "5325,6312",
+                        "endColumns": "41,59",
+                        "endOffsets": "5362,6367"
                     }
                 },
                 {

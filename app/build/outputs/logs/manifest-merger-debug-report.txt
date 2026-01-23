@@ -9,25 +9,10 @@ MERGED from [androidx.navigation:navigation-runtime:2.8.5] /home/Lush1us/.gradle
 MERGED from [androidx.navigation:navigation-common-ktx:2.8.5] /home/Lush1us/.gradle/caches/9.3.0/transforms/3528a9c0d23eec11d2f5dfa08f250052/transformed/navigation-common-ktx-2.8.5/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.navigation:navigation-runtime-ktx:2.8.5] /home/Lush1us/.gradle/caches/9.3.0/transforms/d50eb76d7d134bb59954248d1cdef4e9/transformed/navigation-runtime-ktx-2.8.5/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.navigation:navigation-compose:2.8.5] /home/Lush1us/.gradle/caches/9.3.0/transforms/6e2c85cd67aa8e2cf82bf0fcf8846f98/transformed/navigation-compose-2.8.5/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.activity:activity:1.8.2] /home/Lush1us/.gradle/caches/9.3.0/transforms/92cd05f7f9c6cf0d7d3d8b33d903cb8f/transformed/activity-1.8.2/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.compose.material3:material3-android:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/e2ddb6e392f8f8f2fc2b76f22202ea3e/transformed/material3/AndroidManifest.xml:17:1-22:12
 MERGED from [io.coil-kt:coil-compose:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/fb951e78859a6a4bf4b66b81f33383d7/transformed/coil-compose-2.7.0/AndroidManifest.xml:2:1-7:12
 MERGED from [io.coil-kt:coil-compose-base:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/bca560ec1c5f3be22d044cc2b95ba3a8/transformed/coil-compose-base-2.7.0/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.foundation:foundation-layout-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/613c22d6015bcad66540d84ccbcc7ba8/transformed/foundation-layout/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.material:material-ripple-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/5ac03d138d2abc4609811d612fccae9a/transformed/material-ripple/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.foundation:foundation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/e4e4ac01a322da10190201c717c0b4ff/transformed/foundation-release/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.animation:animation-core-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/a48b8ecd7560dd8c23c12867b9c3ab98/transformed/animation-core/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.animation:animation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/ce2d0f7c7658fe1ac469f0138c300186/transformed/animation/AndroidManifest.xml:2:1-7:12
-MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/86cdaa761e34a6632957f9458d53bc47/transformed/accompanist-drawablepainter-0.32.0/AndroidManifest.xml:17:1-23:12
-MERGED from [androidx.compose.ui:ui-unit-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9c93a3faf705c3b855e61186769d24c/transformed/ui-unit/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-graphics-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/7ea444611b9e508c33393ea06c77c623/transformed/ui-graphics-release/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-geometry-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/0e0c9860f8858894aee1ed322182efc4/transformed/ui-geometry/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-util-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/01cac6a8ec4e32bc5f4b618c858835a5/transformed/ui-util/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-text-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/02f8584d1b26c3d658c06bcf9bdaf259/transformed/ui-text/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/c7c05576837c278bac7e0194ae8de818/transformed/runtime-annotation/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9787dc51c7799a1a1684fd6d93ee359/transformed/emoji2-1.4.0/AndroidManifest.xml:17:1-35:12
 MERGED from [io.coil-kt:coil:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/95a477d378a995934c6f91ba99f4a135/transformed/coil-2.7.0/AndroidManifest.xml:2:1-7:12
-MERGED from [io.coil-kt:coil-base:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/3c25214515f5578ae2db7debd5b9a0d1/transformed/coil-base-2.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.media3:media3-session:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2eda54a0249a9aece9cf292bc14c3c2a/transformed/media3-session-1.5.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.media3:media3-extractor:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/34179e2d8e662495e6f72b5f5ee9c4fc/transformed/media3-extractor-1.5.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.media3:media3-container:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/f8fba6603d00accc71650a4eec9c952c/transformed/media3-container-1.5.1/AndroidManifest.xml:17:1-22:12
@@ -35,7 +20,25 @@ MERGED from [androidx.media3:media3-datasource:1.5.1] /home/Lush1us/.gradle/cach
 MERGED from [androidx.media3:media3-decoder:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/05be3521506d9d3d2cae81e794a25893/transformed/media3-decoder-1.5.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.media3:media3-database:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/800710c0017b2b5650cae243dac610e9/transformed/media3-database-1.5.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.media3:media3-common:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2da02e0d9310e872ee4ee648de77c555/transformed/media3-common-1.5.1/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.compose.material3:material3-android:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/e2ddb6e392f8f8f2fc2b76f22202ea3e/transformed/material3/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.compose.foundation:foundation-layout-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/613c22d6015bcad66540d84ccbcc7ba8/transformed/foundation-layout/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.material:material-ripple-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/5ac03d138d2abc4609811d612fccae9a/transformed/material-ripple/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.foundation:foundation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/e4e4ac01a322da10190201c717c0b4ff/transformed/foundation-release/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.animation:animation-core-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/a48b8ecd7560dd8c23c12867b9c3ab98/transformed/animation-core/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.animation:animation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/ce2d0f7c7658fe1ac469f0138c300186/transformed/animation/AndroidManifest.xml:2:1-7:12
+MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/86cdaa761e34a6632957f9458d53bc47/transformed/accompanist-drawablepainter-0.32.0/AndroidManifest.xml:17:1-23:12
+MERGED from [androidx.compose.material:material-icons-extended-android:1.7.8] /home/Lush1us/.gradle/caches/9.3.0/transforms/e45dd8f4b4b5d854d4e4381669a849db/transformed/material-icons-extended-release/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.material:material-icons-core-android:1.7.8] /home/Lush1us/.gradle/caches/9.3.0/transforms/32174dc01572432179b0af9406819ec6/transformed/material-icons-core-release/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-unit-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9c93a3faf705c3b855e61186769d24c/transformed/ui-unit/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-graphics-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/7ea444611b9e508c33393ea06c77c623/transformed/ui-graphics-release/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-geometry-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/0e0c9860f8858894aee1ed322182efc4/transformed/ui-geometry/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-util-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/01cac6a8ec4e32bc5f4b618c858835a5/transformed/ui-util/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-text-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/02f8584d1b26c3d658c06bcf9bdaf259/transformed/ui-text/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/c7c05576837c278bac7e0194ae8de818/transformed/runtime-annotation/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.activity:activity:1.7.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/23353d6a619fe426505d19d4eb68f408/transformed/activity-1.7.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.activity:activity-ktx:1.7.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/52c2225e902d5c76b15186a057938179/transformed/activity-ktx-1.7.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9787dc51c7799a1a1684fd6d93ee359/transformed/emoji2-1.4.0/AndroidManifest.xml:17:1-35:12
+MERGED from [io.coil-kt:coil-base:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/3c25214515f5578ae2db7debd5b9a0d1/transformed/coil-base-2.7.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.media:media:1.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/fe3c9b40aaf6aa1b58cbd6536f16eec5/transformed/media-1.7.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.autofill:autofill:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/19b7f2ab56d1ab5e455b34558cbccad8/transformed/autofill-1.0.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/02b14fbe4c74c563f9606c81888119ca/transformed/appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
@@ -60,15 +63,14 @@ MERGED from [androidx.compose.runtime:runtime-saveable-android:1.9.3] /home/Lush
 MERGED from [androidx.lifecycle:lifecycle-runtime-compose-android:2.9.4] /home/Lush1us/.gradle/caches/9.3.0/transforms/6b80c7bf6fa7f5dae5129ef1ad5f9c33/transformed/lifecycle-runtime-compose-release/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose-android:2.9.4] /home/Lush1us/.gradle/caches/9.3.0/transforms/515bfcaa777a8125efa2f027d5812be8/transformed/lifecycle-viewmodel-compose-release/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.ui:ui-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/2e9cc091337ebeef213605f918f2e60d/transformed/ui-release/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.activity:activity-ktx:1.8.2] /home/Lush1us/.gradle/caches/9.3.0/transforms/a2e647af1403205eb8ffa741655380f7/transformed/activity-ktx-1.8.2/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.activity:activity-compose:1.8.2] /home/Lush1us/.gradle/caches/9.3.0/transforms/3827bc0c931f864341abd94e53443493/transformed/activity-compose-1.8.2/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c3991d8ebd543ff70379aa7b501f7290/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/1a8fe3db073e685e5603ce661973b521/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.1.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/783c26dc60cc05854483344f4b49bdc6/transformed/localbroadcastmanager-1.1.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/5c8335b24a1c7dd0bea25e031e663975/transformed/profileinstaller-1.4.0/AndroidManifest.xml:17:1-55:12
 MERGED from [androidx.exifinterface:exifinterface:1.3.7] /home/Lush1us/.gradle/caches/9.3.0/transforms/69105971e3e38ee0898968a6736eb968/transformed/exifinterface-1.3.7/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/2a80418871b137ef087f1e2d8f5859b0/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.startup:startup-runtime:1.1.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/4a144dbaaf5b873f8a542d0e514e92c5/transformed/startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
 MERGED from [androidx.tracing:tracing:1.2.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/cd3486bed7e7f40857e507071df96da3/transformed/tracing-1.2.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.interpolator:interpolator:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/2a80418871b137ef087f1e2d8f5859b0/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/4d65ed725d08d4dc330b608cab2a409b/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.core:core-viewtree:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/33e19e8f014c4ee1825ee75b23bb507e/transformed/core-viewtree-1.0.0/AndroidManifest.xml:2:1-7:12
 	package
@@ -166,44 +168,14 @@ MERGED from [androidx.navigation:navigation-runtime-ktx:2.8.5] /home/Lush1us/.gr
 MERGED from [androidx.navigation:navigation-runtime-ktx:2.8.5] /home/Lush1us/.gradle/caches/9.3.0/transforms/d50eb76d7d134bb59954248d1cdef4e9/transformed/navigation-runtime-ktx-2.8.5/AndroidManifest.xml:5:5-44
 MERGED from [androidx.navigation:navigation-compose:2.8.5] /home/Lush1us/.gradle/caches/9.3.0/transforms/6e2c85cd67aa8e2cf82bf0fcf8846f98/transformed/navigation-compose-2.8.5/AndroidManifest.xml:5:5-44
 MERGED from [androidx.navigation:navigation-compose:2.8.5] /home/Lush1us/.gradle/caches/9.3.0/transforms/6e2c85cd67aa8e2cf82bf0fcf8846f98/transformed/navigation-compose-2.8.5/AndroidManifest.xml:5:5-44
-MERGED from [androidx.activity:activity:1.8.2] /home/Lush1us/.gradle/caches/9.3.0/transforms/92cd05f7f9c6cf0d7d3d8b33d903cb8f/transformed/activity-1.8.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.activity:activity:1.8.2] /home/Lush1us/.gradle/caches/9.3.0/transforms/92cd05f7f9c6cf0d7d3d8b33d903cb8f/transformed/activity-1.8.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.compose.material3:material3-android:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/e2ddb6e392f8f8f2fc2b76f22202ea3e/transformed/material3/AndroidManifest.xml:20:5-44
-MERGED from [androidx.compose.material3:material3-android:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/e2ddb6e392f8f8f2fc2b76f22202ea3e/transformed/material3/AndroidManifest.xml:20:5-44
 MERGED from [io.coil-kt:coil-compose:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/fb951e78859a6a4bf4b66b81f33383d7/transformed/coil-compose-2.7.0/AndroidManifest.xml:5:5-44
 MERGED from [io.coil-kt:coil-compose:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/fb951e78859a6a4bf4b66b81f33383d7/transformed/coil-compose-2.7.0/AndroidManifest.xml:5:5-44
 MERGED from [io.coil-kt:coil-compose-base:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/bca560ec1c5f3be22d044cc2b95ba3a8/transformed/coil-compose-base-2.7.0/AndroidManifest.xml:5:5-44
 MERGED from [io.coil-kt:coil-compose-base:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/bca560ec1c5f3be22d044cc2b95ba3a8/transformed/coil-compose-base-2.7.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.foundation:foundation-layout-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/613c22d6015bcad66540d84ccbcc7ba8/transformed/foundation-layout/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.foundation:foundation-layout-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/613c22d6015bcad66540d84ccbcc7ba8/transformed/foundation-layout/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.material:material-ripple-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/5ac03d138d2abc4609811d612fccae9a/transformed/material-ripple/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.material:material-ripple-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/5ac03d138d2abc4609811d612fccae9a/transformed/material-ripple/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.foundation:foundation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/e4e4ac01a322da10190201c717c0b4ff/transformed/foundation-release/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.foundation:foundation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/e4e4ac01a322da10190201c717c0b4ff/transformed/foundation-release/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.animation:animation-core-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/a48b8ecd7560dd8c23c12867b9c3ab98/transformed/animation-core/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.animation:animation-core-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/a48b8ecd7560dd8c23c12867b9c3ab98/transformed/animation-core/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.animation:animation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/ce2d0f7c7658fe1ac469f0138c300186/transformed/animation/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.animation:animation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/ce2d0f7c7658fe1ac469f0138c300186/transformed/animation/AndroidManifest.xml:5:5-44
-MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/86cdaa761e34a6632957f9458d53bc47/transformed/accompanist-drawablepainter-0.32.0/AndroidManifest.xml:21:5-44
-MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/86cdaa761e34a6632957f9458d53bc47/transformed/accompanist-drawablepainter-0.32.0/AndroidManifest.xml:21:5-44
-MERGED from [androidx.compose.ui:ui-unit-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9c93a3faf705c3b855e61186769d24c/transformed/ui-unit/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-unit-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9c93a3faf705c3b855e61186769d24c/transformed/ui-unit/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-graphics-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/7ea444611b9e508c33393ea06c77c623/transformed/ui-graphics-release/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-graphics-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/7ea444611b9e508c33393ea06c77c623/transformed/ui-graphics-release/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-geometry-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/0e0c9860f8858894aee1ed322182efc4/transformed/ui-geometry/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-geometry-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/0e0c9860f8858894aee1ed322182efc4/transformed/ui-geometry/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-util-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/01cac6a8ec4e32bc5f4b618c858835a5/transformed/ui-util/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-util-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/01cac6a8ec4e32bc5f4b618c858835a5/transformed/ui-util/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-text-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/02f8584d1b26c3d658c06bcf9bdaf259/transformed/ui-text/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-text-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/02f8584d1b26c3d658c06bcf9bdaf259/transformed/ui-text/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/c7c05576837c278bac7e0194ae8de818/transformed/runtime-annotation/AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/c7c05576837c278bac7e0194ae8de818/transformed/runtime-annotation/AndroidManifest.xml:5:5-44
-MERGED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9787dc51c7799a1a1684fd6d93ee359/transformed/emoji2-1.4.0/AndroidManifest.xml:21:5-44
-MERGED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9787dc51c7799a1a1684fd6d93ee359/transformed/emoji2-1.4.0/AndroidManifest.xml:21:5-44
 MERGED from [io.coil-kt:coil:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/95a477d378a995934c6f91ba99f4a135/transformed/coil-2.7.0/AndroidManifest.xml:5:5-44
 MERGED from [io.coil-kt:coil:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/95a477d378a995934c6f91ba99f4a135/transformed/coil-2.7.0/AndroidManifest.xml:5:5-44
-MERGED from [io.coil-kt:coil-base:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/3c25214515f5578ae2db7debd5b9a0d1/transformed/coil-base-2.7.0/AndroidManifest.xml:5:5-44
-MERGED from [io.coil-kt:coil-base:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/3c25214515f5578ae2db7debd5b9a0d1/transformed/coil-base-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.media3:media3-session:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2eda54a0249a9aece9cf292bc14c3c2a/transformed/media3-session-1.5.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.media3:media3-session:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2eda54a0249a9aece9cf292bc14c3c2a/transformed/media3-session-1.5.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.media3:media3-extractor:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/34179e2d8e662495e6f72b5f5ee9c4fc/transformed/media3-extractor-1.5.1/AndroidManifest.xml:20:5-44
@@ -218,8 +190,44 @@ MERGED from [androidx.media3:media3-database:1.5.1] /home/Lush1us/.gradle/caches
 MERGED from [androidx.media3:media3-database:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/800710c0017b2b5650cae243dac610e9/transformed/media3-database-1.5.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.media3:media3-common:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2da02e0d9310e872ee4ee648de77c555/transformed/media3-common-1.5.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.media3:media3-common:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2da02e0d9310e872ee4ee648de77c555/transformed/media3-common-1.5.1/AndroidManifest.xml:20:5-44
-MERGED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:20:5-44
-MERGED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.material3:material3-android:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/e2ddb6e392f8f8f2fc2b76f22202ea3e/transformed/material3/AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.material3:material3-android:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/e2ddb6e392f8f8f2fc2b76f22202ea3e/transformed/material3/AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.foundation:foundation-layout-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/613c22d6015bcad66540d84ccbcc7ba8/transformed/foundation-layout/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.foundation:foundation-layout-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/613c22d6015bcad66540d84ccbcc7ba8/transformed/foundation-layout/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-ripple-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/5ac03d138d2abc4609811d612fccae9a/transformed/material-ripple/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-ripple-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/5ac03d138d2abc4609811d612fccae9a/transformed/material-ripple/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.foundation:foundation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/e4e4ac01a322da10190201c717c0b4ff/transformed/foundation-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.foundation:foundation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/e4e4ac01a322da10190201c717c0b4ff/transformed/foundation-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.animation:animation-core-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/a48b8ecd7560dd8c23c12867b9c3ab98/transformed/animation-core/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.animation:animation-core-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/a48b8ecd7560dd8c23c12867b9c3ab98/transformed/animation-core/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.animation:animation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/ce2d0f7c7658fe1ac469f0138c300186/transformed/animation/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.animation:animation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/ce2d0f7c7658fe1ac469f0138c300186/transformed/animation/AndroidManifest.xml:5:5-44
+MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/86cdaa761e34a6632957f9458d53bc47/transformed/accompanist-drawablepainter-0.32.0/AndroidManifest.xml:21:5-44
+MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/86cdaa761e34a6632957f9458d53bc47/transformed/accompanist-drawablepainter-0.32.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.7.8] /home/Lush1us/.gradle/caches/9.3.0/transforms/e45dd8f4b4b5d854d4e4381669a849db/transformed/material-icons-extended-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.7.8] /home/Lush1us/.gradle/caches/9.3.0/transforms/e45dd8f4b4b5d854d4e4381669a849db/transformed/material-icons-extended-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-core-android:1.7.8] /home/Lush1us/.gradle/caches/9.3.0/transforms/32174dc01572432179b0af9406819ec6/transformed/material-icons-core-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-core-android:1.7.8] /home/Lush1us/.gradle/caches/9.3.0/transforms/32174dc01572432179b0af9406819ec6/transformed/material-icons-core-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-unit-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9c93a3faf705c3b855e61186769d24c/transformed/ui-unit/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-unit-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9c93a3faf705c3b855e61186769d24c/transformed/ui-unit/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-graphics-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/7ea444611b9e508c33393ea06c77c623/transformed/ui-graphics-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-graphics-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/7ea444611b9e508c33393ea06c77c623/transformed/ui-graphics-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-geometry-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/0e0c9860f8858894aee1ed322182efc4/transformed/ui-geometry/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-geometry-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/0e0c9860f8858894aee1ed322182efc4/transformed/ui-geometry/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-util-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/01cac6a8ec4e32bc5f4b618c858835a5/transformed/ui-util/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-util-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/01cac6a8ec4e32bc5f4b618c858835a5/transformed/ui-util/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-text-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/02f8584d1b26c3d658c06bcf9bdaf259/transformed/ui-text/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-text-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/02f8584d1b26c3d658c06bcf9bdaf259/transformed/ui-text/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/c7c05576837c278bac7e0194ae8de818/transformed/runtime-annotation/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/c7c05576837c278bac7e0194ae8de818/transformed/runtime-annotation/AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity:1.7.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/23353d6a619fe426505d19d4eb68f408/transformed/activity-1.7.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.7.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/23353d6a619fe426505d19d4eb68f408/transformed/activity-1.7.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity-ktx:1.7.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/52c2225e902d5c76b15186a057938179/transformed/activity-ktx-1.7.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity-ktx:1.7.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/52c2225e902d5c76b15186a057938179/transformed/activity-ktx-1.7.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9787dc51c7799a1a1684fd6d93ee359/transformed/emoji2-1.4.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9787dc51c7799a1a1684fd6d93ee359/transformed/emoji2-1.4.0/AndroidManifest.xml:21:5-44
+MERGED from [io.coil-kt:coil-base:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/3c25214515f5578ae2db7debd5b9a0d1/transformed/coil-base-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-base:2.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/3c25214515f5578ae2db7debd5b9a0d1/transformed/coil-base-2.7.0/AndroidManifest.xml:5:5-44
 MERGED from [androidx.media:media:1.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/fe3c9b40aaf6aa1b58cbd6536f16eec5/transformed/media-1.7.0/AndroidManifest.xml:5:5-44
 MERGED from [androidx.media:media:1.7.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/fe3c9b40aaf6aa1b58cbd6536f16eec5/transformed/media-1.7.0/AndroidManifest.xml:5:5-44
 MERGED from [androidx.autofill:autofill:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/19b7f2ab56d1ab5e455b34558cbccad8/transformed/autofill-1.0.0/AndroidManifest.xml:20:5-22:41
@@ -268,24 +276,22 @@ MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose-android:2.9.4] /home
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose-android:2.9.4] /home/Lush1us/.gradle/caches/9.3.0/transforms/515bfcaa777a8125efa2f027d5812be8/transformed/lifecycle-viewmodel-compose-release/AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.ui:ui-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/2e9cc091337ebeef213605f918f2e60d/transformed/ui-release/AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.ui:ui-android:1.9.3] /home/Lush1us/.gradle/caches/9.3.0/transforms/2e9cc091337ebeef213605f918f2e60d/transformed/ui-release/AndroidManifest.xml:5:5-44
-MERGED from [androidx.activity:activity-ktx:1.8.2] /home/Lush1us/.gradle/caches/9.3.0/transforms/a2e647af1403205eb8ffa741655380f7/transformed/activity-ktx-1.8.2/AndroidManifest.xml:5:5-44
-MERGED from [androidx.activity:activity-ktx:1.8.2] /home/Lush1us/.gradle/caches/9.3.0/transforms/a2e647af1403205eb8ffa741655380f7/transformed/activity-ktx-1.8.2/AndroidManifest.xml:5:5-44
-MERGED from [androidx.activity:activity-compose:1.8.2] /home/Lush1us/.gradle/caches/9.3.0/transforms/3827bc0c931f864341abd94e53443493/transformed/activity-compose-1.8.2/AndroidManifest.xml:5:5-44
-MERGED from [androidx.activity:activity-compose:1.8.2] /home/Lush1us/.gradle/caches/9.3.0/transforms/3827bc0c931f864341abd94e53443493/transformed/activity-compose-1.8.2/AndroidManifest.xml:5:5-44
 MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c3991d8ebd543ff70379aa7b501f7290/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
 MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c3991d8ebd543ff70379aa7b501f7290/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/1a8fe3db073e685e5603ce661973b521/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/1a8fe3db073e685e5603ce661973b521/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.1.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/783c26dc60cc05854483344f4b49bdc6/transformed/localbroadcastmanager-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.1.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/783c26dc60cc05854483344f4b49bdc6/transformed/localbroadcastmanager-1.1.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/5c8335b24a1c7dd0bea25e031e663975/transformed/profileinstaller-1.4.0/AndroidManifest.xml:21:5-44
 MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/5c8335b24a1c7dd0bea25e031e663975/transformed/profileinstaller-1.4.0/AndroidManifest.xml:21:5-44
 MERGED from [androidx.exifinterface:exifinterface:1.3.7] /home/Lush1us/.gradle/caches/9.3.0/transforms/69105971e3e38ee0898968a6736eb968/transformed/exifinterface-1.3.7/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.exifinterface:exifinterface:1.3.7] /home/Lush1us/.gradle/caches/9.3.0/transforms/69105971e3e38ee0898968a6736eb968/transformed/exifinterface-1.3.7/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/2a80418871b137ef087f1e2d8f5859b0/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/2a80418871b137ef087f1e2d8f5859b0/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.startup:startup-runtime:1.1.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/4a144dbaaf5b873f8a542d0e514e92c5/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
 MERGED from [androidx.startup:startup-runtime:1.1.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/4a144dbaaf5b873f8a542d0e514e92c5/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
 MERGED from [androidx.tracing:tracing:1.2.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/cd3486bed7e7f40857e507071df96da3/transformed/tracing-1.2.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.tracing:tracing:1.2.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/cd3486bed7e7f40857e507071df96da3/transformed/tracing-1.2.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/2a80418871b137ef087f1e2d8f5859b0/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/2a80418871b137ef087f1e2d8f5859b0/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/4d65ed725d08d4dc330b608cab2a409b/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/4d65ed725d08d4dc330b608cab2a409b/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.core:core-viewtree:1.0.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/33e19e8f014c4ee1825ee75b23bb507e/transformed/core-viewtree-1.0.0/AndroidManifest.xml:5:5-44
@@ -294,6 +300,12 @@ MERGED from [androidx.core:core-viewtree:1.0.0] /home/Lush1us/.gradle/caches/9.3
 		INJECTED from /home/Lush1us/projects/PodderApp/app/src/main/AndroidManifest.xml
 	android:minSdkVersion
 		INJECTED from /home/Lush1us/projects/PodderApp/app/src/main/AndroidManifest.xml
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-common:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2da02e0d9310e872ee4ee648de77c555/transformed/media3-common-1.5.1/AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-common:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2da02e0d9310e872ee4ee648de77c555/transformed/media3-common-1.5.1/AndroidManifest.xml:22:5-79
+	android:name
+		ADDED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:22:22-76
 provider#androidx.startup.InitializationProvider
 ADDED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9787dc51c7799a1a1684fd6d93ee359/transformed/emoji2-1.4.0/AndroidManifest.xml:24:9-32:20
 MERGED from [androidx.lifecycle:lifecycle-process:2.9.4] /home/Lush1us/.gradle/caches/9.3.0/transforms/57581fdeb054c50a330e5f689bbcd87b/transformed/lifecycle-process-2.9.4/AndroidManifest.xml:24:9-32:20
@@ -316,12 +328,6 @@ ADDED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/tra
 		ADDED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9787dc51c7799a1a1684fd6d93ee359/transformed/emoji2-1.4.0/AndroidManifest.xml:31:17-49
 	android:name
 		ADDED from [androidx.emoji2:emoji2:1.4.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/f9787dc51c7799a1a1684fd6d93ee359/transformed/emoji2-1.4.0/AndroidManifest.xml:30:17-75
-uses-permission#android.permission.ACCESS_NETWORK_STATE
-ADDED from [androidx.media3:media3-common:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2da02e0d9310e872ee4ee648de77c555/transformed/media3-common-1.5.1/AndroidManifest.xml:22:5-79
-MERGED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:22:5-79
-MERGED from [androidx.media3:media3-exoplayer:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/c5003d7beaba7491992e756d847b83f8/transformed/media3-exoplayer-1.5.1/AndroidManifest.xml:22:5-79
-	android:name
-		ADDED from [androidx.media3:media3-common:1.5.1] /home/Lush1us/.gradle/caches/9.3.0/transforms/2da02e0d9310e872ee4ee648de77c555/transformed/media3-common-1.5.1/AndroidManifest.xml:22:22-76
 permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.15.0] /home/Lush1us/.gradle/caches/9.3.0/transforms/ad95630429f4bcf2339799bd947f2c43/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
 	android:protectionLevel

@@ -7,16 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.podder.ui.screens.HomeScreen
 import com.example.podder.ui.theme.PodderTheme
-import com.example.podder.parser.Episode
 import com.example.podder.ui.screens.PodcastViewModel
 import com.example.podder.data.PodcastRepository
 import com.example.podder.domain.PodcastUseCase
 import com.example.podder.domain.PodcastUseCaseImpl
 import android.content.Intent
-import com.example.podder.player.PodcastPlayerService
-import com.example.podder.core.PodcastAction
+<<<<<<< HEAD
+import com.example.podder.ui.AppNavigation
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +37,7 @@ class MainActivity : ComponentActivity() {
             "https://feeds.simplecast.com/l2i9YnTd",
             "https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/8a94442e-5a74-4fa2-8b8d-ae27003a8d6b/982f5071-765c-403d-969d-ae27003a8d83/podcast.rss",
             "https://www.omnycontent.com/d/playlist/d83f52e4-2455-47f4-982e-ab790120b954/5155908f-a515-4bbf-aa13-ab8600cec954/ae5224b3-9ebb-45c2-bb5f-ab8600cec959/podcast.rss",
-            "https://feeds.npr.org/510289/podcast.xml",
+            "https.feeds.npr.org/510289/podcast.xml",
             "https://cafe.com/feed/f-1dKXSHr159",
             "https://feeds.megaphone.fm/VMP1684715893",
             "https://feeds.npr.org/510355/podcast.xml",
@@ -91,7 +89,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(viewModel = podcastViewModel)
+                    AppNavigation(viewModel = podcastViewModel)
                 }
             }
         }
@@ -99,7 +97,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        val intent = Intent(this, PodcastPlayerService::class.java)
-        stopService(intent)
+        // The PodcastPlayerService is no longer directly controlled by MainActivity
+        // Its lifecycle should be managed by Media3 itself or by the player logic within the ViewModel.
+        // Removing the explicit stopService call.
     }
 }

@@ -29,3 +29,5 @@ podcast_error.log
 
 # Gemini specific
 GEMINI.md
+notebookLM/
+ingest.py

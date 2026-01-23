@@ -3,14 +3,20 @@ package com.example.podder.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.podder.parser.Podcast
-import com.example.podder.data.PodcastRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+<<<<<<< HEAD
 import com.example.podder.core.Action
 import com.example.podder.core.PodcastAction
 import com.example.podder.domain.PodcastUseCase
+=======
+import com.example.podder.core.PodcastAction
+import com.example.podder.domain.PodcastUseCase
+import kotlin.onSuccess
+import kotlin.onFailure
+>>>>>>> f8fedc6 (Refactor Podder codebase to enforce Operator Pattern and Type-Safe Navigation, and fix Media3 service configuration.)
 
 sealed class PodcastUiState {
     data object Loading : PodcastUiState()
@@ -22,17 +28,19 @@ class PodcastViewModel(private val podcastUseCase: PodcastUseCase) : ViewModel()
     private val _uiState = MutableStateFlow<PodcastUiState>(PodcastUiState.Loading)
     val uiState: StateFlow<PodcastUiState> = _uiState.asStateFlow()
 
-    fun processAction(action: PodcastAction) {
+    fun process(action: PodcastAction) {
         // Log the action (as per GEMINI.md)
         println("Action received: ${action.javaClass.simpleName} from ${action.source} at ${action.timestamp}")
 
         when (action) {
-            is PodcastAction.FetchPodcast -> handleFetchPodcast(action.url)
-            is PodcastAction.FetchPodcasts -> handleFetchPodcasts(action.urls)
+            is PodcastAction.FetchPodcast -> _handleFetchPodcast(action.url)
+            is PodcastAction.FetchPodcasts -> _handleFetchPodcasts(action.urls)
+            is PodcastAction.Play -> { /* TODO: Implement Play logic */ }
+            is PodcastAction.Pause -> { /* TODO: Implement Pause logic */ }
         }
     }
 
-    private fun handleFetchPodcast(url: String) {
+    private fun _handleFetchPodcast(url: String) {
         viewModelScope.launch {
             _uiState.value = PodcastUiState.Loading
             podcastUseCase.getPodcast(url)
@@ -45,7 +53,7 @@ class PodcastViewModel(private val podcastUseCase: PodcastUseCase) : ViewModel()
         }
     }
 
-    private fun handleFetchPodcasts(urls: List<String>) {
+    private fun _handleFetchPodcasts(urls: List<String>) {
         viewModelScope.launch {
             _uiState.value = PodcastUiState.Loading
             val podcasts = mutableListOf<Podcast>()

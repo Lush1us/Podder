@@ -32,13 +32,9 @@ class PodcastRepository {
     suspend fun getPodcast(feedUrl: String): Result<Podcast> {
         return try {
             val xmlString = service.getFeed(feedUrl)
-            val inputStream = ByteArrayInputStream(xmlString.toByteArray())
-            val podcast = xmlParser.parse(inputStream)
-            println("Decoded Podcast: $podcast")
+            println("XML String: $xmlString")
+            val podcast = xml.decodeFromString<RssFeed>(xmlString).channel
             Result.success(podcast)
-        } catch (e: retrofit2.HttpException) {
-            e.printStackTrace()
-            Result.failure(Exception("HTTP ${e.code()}: ${e.message()}"))
         } catch (e: Exception) {
             e.printStackTrace()
             Result.failure(e)

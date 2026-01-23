@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.podder.app-mergeDebugResources-39:/values-pa/values-pa.xml",
+            "outputFile": "com.example.podder.app-mergeDebugResources-41:/values-pa/values-pa.xml",
             "map": [
                 {
                     "source": "/home/Lush1us/.gradle/caches/9.3.0/transforms/2eda54a0249a9aece9cf292bc14c3c2a/transformed/media3-session-1.5.1/res/values-pa/values-pa.xml",
