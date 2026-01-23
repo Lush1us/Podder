@@ -23,6 +23,8 @@ class MainActivity : ComponentActivity() {
         val podcastUseCase: PodcastUseCase = PodcastUseCaseImpl(podcastRepository)
         val podcastViewModel = PodcastViewModel(podcastUseCase)
 
+        podcastViewModel.processAction(com.example.podder.core.PodcastAction.FetchPodcast(url = "https://feeds.npr.org/510318/podcast.xml", source = "MainActivity", timestamp = System.currentTimeMillis()))
+
         setContent {
             PodderTheme {
                 // A surface container using the 'background' color from the theme
@@ -30,7 +32,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(viewModel = podcastViewModel, onEpisodeClick = {})
+                    HomeScreen(viewModel = podcastViewModel)
                 }
             }
         }

@@ -1,14 +1,14 @@
 package com.example.podder.data
 
 import com.example.podder.parser.Podcast
-import com.example.podder.parser.RssFeed
-import nl.adaptivity.xmlutil.serialization.XML
+import com.example.podder.parser.MyXmlParser
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Url
 import kotlinx.serialization.decodeFromString
+import java.io.ByteArrayInputStream
 
 interface PodcastService {
     @GET
@@ -17,12 +17,7 @@ interface PodcastService {
 
 class PodcastRepository {
     private val service: PodcastService
-
-    private val xml = XML {
-        defaultPolicy {
-            ignoreUnknownChildren()
-        }
-    }
+    private val xmlParser = MyXmlParser()
 
     init {
         val retrofit = Retrofit.Builder()
@@ -34,14 +29,19 @@ class PodcastRepository {
         service = retrofit.create(PodcastService::class.java)
     }
 
-    suspend fun getPodcast(feedUrl: String): Podcast? {
+    suspend fun getPodcast(feedUrl: String): Result<Podcast> {
         return try {
             val xmlString = service.getFeed(feedUrl)
-            println("XML String: $xmlString")
-            xml.decodeFromString<RssFeed>(xmlString).channel
+            val inputStream = ByteArrayInputStream(xmlString.toByteArray())
+            val podcast = xmlParser.parse(inputStream)
+            println("Decoded Podcast: $podcast")
+            Result.success(podcast)
+        } catch (e: retrofit2.HttpException) {
+            e.printStackTrace()
+            Result.failure(Exception("HTTP ${e.code()}: ${e.message()}"))
         } catch (e: Exception) {
             e.printStackTrace()
-            null
+            Result.failure(e)
         }
     }
 }

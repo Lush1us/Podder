@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.example.podder.core.Action
+import com.example.podder.core.PodcastAction
+import com.example.podder.domain.PodcastUseCase
 
 sealed class PodcastUiState {
     data object Loading : PodcastUiState()
@@ -16,17 +18,9 @@ sealed class PodcastUiState {
     data class Error(val message: String) : PodcastUiState()
 }
 
-sealed class PodcastAction : Action {
-    data class FetchPodcast(override val source: String, override val timestamp: Long, val url: String) : PodcastAction()
-}
-
 class PodcastViewModel(private val podcastUseCase: PodcastUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow<PodcastUiState>(PodcastUiState.Loading)
     val uiState: StateFlow<PodcastUiState> = _uiState.asStateFlow()
-
-    init {
-        processAction(PodcastAction.FetchPodcast(url = "https://feeds.npr.org/510318/podcast.xml", source = "init", timestamp = System.currentTimeMillis()))
-    }
 
     fun processAction(action: PodcastAction) {
         // Log the action (as per GEMINI.md)
@@ -40,12 +34,13 @@ class PodcastViewModel(private val podcastUseCase: PodcastUseCase) : ViewModel()
     private fun handleFetchPodcast(url: String) {
         viewModelScope.launch {
             _uiState.value = PodcastUiState.Loading
-            val podcast = podcastUseCase.getPodcast(url)
-            _uiState.value = if (podcast != null) {
-                PodcastUiState.Success(podcast)
-            } else {
-                PodcastUiState.Error("Failed to load podcast")
-            }
+            podcastUseCase.getPodcast(url)
+                .onSuccess { podcast ->
+                    _uiState.value = PodcastUiState.Success(podcast)
+                }
+                .onFailure { error ->
+                    _uiState.value = PodcastUiState.Error(error.message ?: "Unknown error")
+                }
         }
     }
 }
