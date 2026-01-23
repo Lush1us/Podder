@@ -3,8 +3,6 @@ package com.example.podder.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-<<<<<<< HEAD
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,8 +29,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.podder.parser.Podcast
 import com.example.podder.ui.components.PlayerControls
-import com.example.podder.ui.screens.PodcastUiState
-import com.example.podder.ui.screens.PodcastViewModel
 import androidx.compose.runtime.LaunchedEffect
 import com.example.podder.core.PodcastAction
 import androidx.navigation.NavController
@@ -42,7 +38,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.activity.ComponentActivity
 import com.example.podder.ui.PodcastDetails
->>>>>>> f8fedc6 (Refactor Podder codebase to enforce Operator Pattern and Type-Safe Navigation, and fix Media3 service configuration.)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

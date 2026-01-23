@@ -12,9 +12,8 @@ import com.example.podder.ui.screens.PodcastViewModel
 import com.example.podder.data.PodcastRepository
 import com.example.podder.domain.PodcastUseCase
 import com.example.podder.domain.PodcastUseCaseImpl
-import android.content.Intent
-<<<<<<< HEAD
 import com.example.podder.ui.AppNavigation
+import com.example.podder.core.PodcastAction
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +79,7 @@ class MainActivity : ComponentActivity() {
             "https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/416fbd2e-f519-4bf3-af87-ae320005bc15/cb306f79-8f13-4de6-9c32-ae320005bc35/podcast.rss"
         )
 
-        podcastViewModel.processAction(PodcastAction.FetchPodcasts(urls = podcastUrls, source = "MainActivity", timestamp = System.currentTimeMillis()))
+        podcastViewModel.process(PodcastAction.FetchPodcasts(urls = podcastUrls, source = "MainActivity", timestamp = System.currentTimeMillis()))
 
         setContent {
             PodderTheme {

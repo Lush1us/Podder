@@ -7,7 +7,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Url
-import kotlinx.serialization.decodeFromString
 import java.io.ByteArrayInputStream
 
 interface PodcastService {
@@ -32,8 +31,7 @@ class PodcastRepository {
     suspend fun getPodcast(feedUrl: String): Result<Podcast> {
         return try {
             val xmlString = service.getFeed(feedUrl)
-            println("XML String: $xmlString")
-            val podcast = xml.decodeFromString<RssFeed>(xmlString).channel
+            val podcast = xmlParser.parse(ByteArrayInputStream(xmlString.toByteArray()))
             Result.success(podcast)
         } catch (e: Exception) {
             e.printStackTrace()

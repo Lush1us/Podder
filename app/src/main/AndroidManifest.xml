@@ -16,11 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".player.PodcastPlayerService"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
         <service
-            android:name=".service.PlaybackService"
+            android:name=".player.PlaybackService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="true">
             <intent-filter>
