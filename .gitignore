@@ -1,6 +1,6 @@
 # Gradle
 .gradle/
-/build/
+build/
 
 # Android
 /local.properties
@@ -30,4 +30,3 @@ podcast_error.log
 # Gemini specific
 GEMINI.md
 notebookLM/
-ingest.py/app/build/
