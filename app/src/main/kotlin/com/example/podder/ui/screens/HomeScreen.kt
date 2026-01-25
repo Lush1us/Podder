@@ -47,7 +47,7 @@ fun HomeScreen(
                     )
                 }
                 is HomeUiState.Success -> {
-                    EpisodeList(episodes = state.feed)
+                    EpisodeList(episodes = state.feed, viewModel = viewModel)
                 }
             }
         }
@@ -55,13 +55,25 @@ fun HomeScreen(
 }
 
 @Composable
-fun EpisodeList(episodes: List<EpisodeWithPodcast>) {
+fun EpisodeList(episodes: List<EpisodeWithPodcast>, viewModel: PodcastViewModel) {
     LazyColumn {
         items(episodes) { item ->
             ListItem(
                 headlineContent = { Text(item.episode.title) },
                 supportingContent = { Text(item.podcast.title) },
-                trailingContent = { Text(item.episode.duration) }
+                trailingContent = { Text(item.episode.duration) },
+                modifier = Modifier.clickable {
+                    viewModel.process(
+                        PodcastAction.Play(
+                            url = item.episode.audioUrl,
+                            title = item.episode.title,
+                            artist = item.podcast.title,
+                            imageUrl = item.podcast.imageUrl,
+                            source = "HomeScreen",
+                            timestamp = System.currentTimeMillis()
+                        )
+                    )
+                }
             )
             HorizontalDivider()
         }

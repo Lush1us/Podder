@@ -24,7 +24,6 @@ class PodcastViewModel(
     private val playerController: PlayerController
 ) : ViewModel() {
 
-    // Hot flow observing the DB
     val uiState: StateFlow<HomeUiState> = repository.homeFeed
         .map { HomeUiState.Success(it) }
         .stateIn(
@@ -35,27 +34,26 @@ class PodcastViewModel(
 
     fun initializeSubscriptions(inputStream: InputStream) {
         viewModelScope.launch {
-            // Check if subscriptions already exist
             if (!repository.hasSubscriptions()) {
-                // Import OPML if no subscriptions exist
                 repository.importOpml(inputStream)
             }
-            // Fetch podcasts after ensuring subscriptions are loaded
             repository.updatePodcasts()
         }
     }
 
     fun process(action: PodcastAction) {
-        println("Action: ${action}") // Traceability
         when (action) {
             is PodcastAction.FetchPodcasts -> {
-                viewModelScope.launch {
-                    repository.updatePodcasts()
-                }
+                viewModelScope.launch { repository.updatePodcasts() }
             }
             is PodcastAction.Play -> {
                 viewModelScope.launch {
-                    playerController.play(action.podcastId)
+                    playerController.play(
+                        url = action.url,
+                        title = action.title,
+                        artist = action.artist,
+                        imageUrl = action.imageUrl
+                    )
                 }
             }
             else -> {}

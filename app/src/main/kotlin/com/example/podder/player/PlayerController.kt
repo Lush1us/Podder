@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import kotlinx.coroutines.Dispatchers
@@ -27,16 +28,26 @@ class PlayerController(private val context: Context) {
         }
     }
 
-    suspend fun play(url: String) = withContext(Dispatchers.Main) {
+    suspend fun play(url: String, title: String, artist: String, imageUrl: String?) = withContext(Dispatchers.Main) {
         try {
             val mediaController = ensureController()
-            // Create item directly from URI
-            val mediaItem = MediaItem.fromUri(Uri.parse(url))
+
+            // Build Metadata for Notification
+            val metadata = MediaMetadata.Builder()
+                .setTitle(title)
+                .setArtist(artist)
+                .setArtworkUri(imageUrl?.let { Uri.parse(it) })
+                .build()
+
+            val mediaItem = MediaItem.Builder()
+                .setUri(url)
+                .setMediaMetadata(metadata)
+                .build()
 
             mediaController.setMediaItem(mediaItem)
             mediaController.prepare()
             mediaController.play()
-            Log.d("PlayerController", "Playing: $url")
+            Log.d("PlayerController", "Playing: $title by $artist")
         } catch (e: Exception) {
             e.printStackTrace()
         }
