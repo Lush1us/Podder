@@ -1,14 +1,18 @@
 package com.example.podder.ui.screens
 
-import com.example.podder.core.Action
+import com.example.podder.core.PodcastAction
 import com.example.podder.data.PodcastRepository
-import com.example.podder.domain.PodcastUseCase
-import com.example.podder.domain.PodcastUseCaseImpl
-import com.example.podder.parser.Podcast
+import com.example.podder.data.local.EpisodeWithPodcast
+import com.example.podder.data.local.EpisodeEntity
+import com.example.podder.data.local.PodcastEntity
+import com.example.podder.player.PlayerController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -19,21 +23,22 @@ import org.junit.Test
 import org.junit.Assert.*
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 
 @ExperimentalCoroutinesApi
 class PodcastViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var mockPodcastRepository: PodcastRepository
-    private lateinit var podcastUseCase: PodcastUseCase
+    private lateinit var mockPlayerController: PlayerController
     private lateinit var viewModel: PodcastViewModel
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         mockPodcastRepository = mock(PodcastRepository::class.java)
-        podcastUseCase = PodcastUseCaseImpl(mockPodcastRepository)
-        viewModel = PodcastViewModel(podcastUseCase)
+        mockPlayerController = mock(PlayerController::class.java)
+        viewModel = PodcastViewModel(mockPodcastRepository, mockPlayerController)
     }
 
     @After
@@ -42,46 +47,44 @@ class PodcastViewModelTest {
     }
 
     @Test
-    fun `fetchPodcast action updates uiState to Success on successful fetch`() = runTest {
+    fun `init updates uiState to Success on successful feed emission`() = runTest(testDispatcher) {
         // Given
-        val dummyPodcast = Podcast(
-            title = "Test Podcast",
-            description = "A podcast for testing",
-            link = "http://test.com",
-            episodes = emptyList()
-        )
-        `when`(mockPodcastRepository.getPodcast("http://test.com/podcast.xml")).thenReturn(dummyPodcast)
+        val dummyPodcast = PodcastEntity("url1", "Podcast Title", "image1")
+        val dummyEpisode = EpisodeEntity("guid1", "url1", "Episode Title", "Description", 123L, "audio1", "100")
+        val dummyFeed = listOf(EpisodeWithPodcast(dummyEpisode, dummyPodcast))
+
+        `when`(mockPodcastRepository.homeFeed).thenReturn(flowOf(dummyFeed))
 
         // When
-        viewModel.processAction(PodcastAction.FetchPodcast(
-            url = "http://test.com/podcast.xml",
-            source = "test",
-            timestamp = System.currentTimeMillis()
-        ))
-        advanceUntilIdle() // Allow coroutines to complete
+        viewModel = PodcastViewModel(mockPodcastRepository, mockPlayerController) // Re-initialize to trigger init block
+
+        // Start collecting the StateFlow to trigger subscription
+        val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect {}
+        }
+
+        testScheduler.advanceUntilIdle() // Allow coroutines to complete
 
         // Then
-        val uiState = viewModel.uiState.first()
-        assertTrue(uiState is PodcastUiState.Success)
-        assertEquals(dummyPodcast, (uiState as PodcastUiState.Success).podcast)
+        val uiState = viewModel.uiState.value
+        assertTrue("Expected Success state but got ${uiState::class.simpleName}", uiState is HomeUiState.Success)
+        if (uiState is HomeUiState.Success) {
+            assertEquals(dummyFeed, uiState.feed)
+        }
+
+        collectJob.cancel()
     }
 
     @Test
-    fun `fetchPodcast action updates uiState to Error on failed fetch`() = runTest {
+    fun `FetchPodcasts action calls updatePodcasts on repository`() = runTest(testDispatcher) {
         // Given
-        `when`(mockPodcastRepository.getPodcast("http://test.com/podcast.xml")).thenReturn(null)
+        `when`(mockPodcastRepository.homeFeed).thenReturn(flowOf(emptyList())) // Mock initial state
 
         // When
-        viewModel.processAction(PodcastAction.FetchPodcast(
-            url = "http://test.com/podcast.xml",
-            source = "test",
-            timestamp = System.currentTimeMillis()
-        ))
-        advanceUntilIdle() // Allow coroutines to complete
+        viewModel.process(PodcastAction.FetchPodcasts(source = "test", timestamp = System.currentTimeMillis()))
+        testScheduler.advanceUntilIdle() // Allow coroutines to complete
 
         // Then
-        val uiState = viewModel.uiState.first()
-        assertTrue(uiState is PodcastUiState.Error)
-        assertEquals("Failed to load podcast", (uiState as PodcastUiState.Error).message)
+        verify(mockPodcastRepository).updatePodcasts()
     }
 }

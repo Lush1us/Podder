@@ -10,6 +10,8 @@ data class Podcast(
     val title: String = "awesome podcast",
     @SerialName("description")
     val description: String? = null,
+    @SerialName("imageUrl")
+    val imageUrl: String? = null, // Added imageUrl
     @SerialName("item")
     val episodes: List<Episode> = emptyList()
 )
@@ -23,6 +25,10 @@ data class Episode(
     val description: String? = null,
     @SerialName("pubDate")
     val pubDate: String? = null,
+    @SerialName("guid")
+    val guid: String? = null, // Added guid
+    @SerialName("duration")
+    val duration: Long? = null, // Added duration
     @SerialName("enclosure")
     val enclosure: Enclosure? = null
 ) {

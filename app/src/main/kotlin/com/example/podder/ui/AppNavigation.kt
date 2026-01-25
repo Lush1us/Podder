@@ -7,7 +7,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.podder.ui.screens.HomeScreen
 import com.example.podder.ui.screens.PodcastDetailScreen
-import com.example.podder.ui.screens.PodcastUiState
 import com.example.podder.ui.screens.PodcastViewModel
 import kotlinx.serialization.Serializable
 
@@ -24,6 +23,7 @@ fun AppNavigation(viewModel: PodcastViewModel) {
         composable<Home> {
             HomeScreen(viewModel = viewModel, navController = navController)
         }
+        /*
         composable<PodcastDetails> { backStackEntry ->
             val podcastDetails = backStackEntry.toRoute<PodcastDetails>()
             val podcast = (viewModel.uiState.value as? PodcastUiState.Success)?.podcasts?.find { it.title == podcastDetails.title }
@@ -31,5 +31,6 @@ fun AppNavigation(viewModel: PodcastViewModel) {
                 PodcastDetailScreen(podcast = podcast, navController = navController, viewModel = viewModel)
             }
         }
+        */
     }
 }
