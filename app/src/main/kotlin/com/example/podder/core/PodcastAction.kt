@@ -14,4 +14,5 @@ sealed interface PodcastAction : Traceable {
     ) : PodcastAction
 
     data class Pause(override val source: String, override val timestamp: Long) : PodcastAction
+    data class TogglePlayPause(override val source: String, override val timestamp: Long) : PodcastAction
 }

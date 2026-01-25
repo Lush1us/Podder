@@ -15,6 +15,7 @@ import androidx.navigation.NavController
 import com.example.podder.R
 import com.example.podder.core.PodcastAction
 import com.example.podder.data.local.EpisodeWithPodcast
+import com.example.podder.ui.components.PlayerControls
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,6 +24,7 @@ fun HomeScreen(
     navController: NavController
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val playerState by viewModel.playerUiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -32,7 +34,25 @@ fun HomeScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Podder Feed") }) }
+        topBar = { TopAppBar(title = { Text("Podder Feed") }) },
+        bottomBar = {
+            if (playerState.currentTitle.isNotEmpty()) {
+                PlayerControls(
+                    progress = playerState.progress,
+                    isPlaying = playerState.isPlaying,
+                    onPlayPause = {
+                        viewModel.process(
+                            PodcastAction.TogglePlayPause(
+                                source = "HomeScreen",
+                                timestamp = System.currentTimeMillis()
+                            )
+                        )
+                    },
+                    onNext = { /* TODO: Implement next track */ },
+                    onPrevious = { /* TODO: Implement previous track */ }
+                )
+            }
+        }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val state = uiState) {

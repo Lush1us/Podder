@@ -6,6 +6,7 @@ import com.example.podder.core.PodcastAction
 import com.example.podder.data.PodcastRepository
 import com.example.podder.data.local.EpisodeWithPodcast
 import com.example.podder.player.PlayerController
+import com.example.podder.player.PlayerUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -32,6 +33,8 @@ class PodcastViewModel(
             initialValue = HomeUiState.Loading
         )
 
+    val playerUiState: StateFlow<PlayerUiState> = playerController.playerUiState
+
     fun initializeSubscriptions(inputStream: InputStream) {
         viewModelScope.launch {
             if (!repository.hasSubscriptions()) {
@@ -54,6 +57,11 @@ class PodcastViewModel(
                         artist = action.artist,
                         imageUrl = action.imageUrl
                     )
+                }
+            }
+            is PodcastAction.TogglePlayPause -> {
+                viewModelScope.launch {
+                    playerController.togglePlayPause()
                 }
             }
             else -> {}
