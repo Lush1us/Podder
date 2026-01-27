@@ -55,7 +55,8 @@ class PodcastViewModel(
                         url = action.url,
                         title = action.title,
                         artist = action.artist,
-                        imageUrl = action.imageUrl
+                        imageUrl = action.imageUrl,
+                        description = action.description
                     )
                 }
             }

@@ -53,6 +53,7 @@ fun PodcastDetailScreen(
                                     title = episode.title,
                                     artist = podcast.title,
                                     imageUrl = podcast.imageUrl,
+                                    description = episode.description,
                                     source = "PodcastDetailScreen",
                                     timestamp = System.currentTimeMillis()
                                 )

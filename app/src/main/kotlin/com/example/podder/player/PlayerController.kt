@@ -24,6 +24,8 @@ import kotlinx.coroutines.withContext
 data class PlayerUiState(
     val isPlaying: Boolean = false,
     val currentTitle: String = "",
+    val description: String? = null,
+    val imageUrl: String? = null,
     val progress: Float = 0f
 )
 
@@ -47,7 +49,9 @@ class PlayerController(private val context: Context) {
 
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
             _playerUiState.value = _playerUiState.value.copy(
-                currentTitle = mediaMetadata.title?.toString() ?: ""
+                currentTitle = mediaMetadata.title?.toString() ?: "",
+                description = mediaMetadata.description?.toString(),
+                imageUrl = mediaMetadata.artworkUri?.toString()
             )
         }
     }
@@ -68,7 +72,7 @@ class PlayerController(private val context: Context) {
         }
     }
 
-    suspend fun play(url: String, title: String, artist: String, imageUrl: String?) = withContext(Dispatchers.Main) {
+    suspend fun play(url: String, title: String, artist: String, imageUrl: String?, description: String?) = withContext(Dispatchers.Main) {
         try {
             val mediaController = ensureController()
 
@@ -77,6 +81,7 @@ class PlayerController(private val context: Context) {
                 .setTitle(title)
                 .setArtist(artist)
                 .setArtworkUri(imageUrl?.let { Uri.parse(it) })
+                .setDescription(description)
                 .build()
 
             val mediaItem = MediaItem.Builder()

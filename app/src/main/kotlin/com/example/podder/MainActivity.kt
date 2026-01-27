@@ -46,12 +46,12 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+            // Uses system dark mode setting
             PodderTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // Use the factory to get the ViewModel
                     val podcastViewModel: PodcastViewModel = viewModel(factory = viewModelFactory)
                     AppNavigation(viewModel = podcastViewModel)
                 }
