@@ -5,6 +5,7 @@ sealed interface PodcastAction : Traceable {
     data class FetchPodcasts(override val source: String, override val timestamp: Long) : PodcastAction
 
     data class Play(
+        val guid: String,
         val url: String,
         val title: String,
         val artist: String,

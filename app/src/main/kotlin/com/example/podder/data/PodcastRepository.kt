@@ -48,33 +48,65 @@ class PodcastRepository(
         subscriptionDao.getCount() > 0
     }
 
+    suspend fun hasEpisodes(): Boolean = withContext(Dispatchers.IO) {
+        podcastDao.getEpisodeCount() > 0
+    }
+
+    suspend fun saveProgress(guid: String, progress: Long) = withContext(Dispatchers.IO) {
+        podcastDao.updateProgress(guid, progress)
+    }
+
+    suspend fun getEpisode(guid: String): EpisodeEntity? = withContext(Dispatchers.IO) {
+        podcastDao.getEpisode(guid)
+    }
+
     suspend fun updatePodcasts() = withContext(Dispatchers.IO) {
+        // Skip network fetch if we already have cached episodes
+        if (podcastDao.getEpisodeCount() > 0) return@withContext
+        forceRefresh()
+    }
+
+    suspend fun forceRefresh() = withContext(Dispatchers.IO) {
+        // Step 1: Get existing progress before sync
+        val progressMap = podcastDao.getAllProgress()
+            .associate { it.guid to it.progressInMillis }
+
         val urls = subscriptionDao.getAllUrls()
         for (url in urls) {
             try {
                 val xml = service.getFeed(url)
-                val podcastDto = xmlParser.parse(xml.byteInputStream()) 
-                
+                val podcastDto = xmlParser.parse(xml.byteInputStream())
+
                 val podcastEntity = PodcastEntity(url, podcastDto.title, podcastDto.imageUrl)
-                
-                val episodeEntities = podcastDto.episodes.map { 
+
+                // Step 2: Merge progress into new episodes
+                val episodeEntities = podcastDto.episodes.map {
+                    // Use podcast title + episode title hash as fallback to match UI GUID generation
+                    val guid = it.guid ?: "${podcastDto.title}-${it.title.hashCode()}"
+                    val savedProgress = progressMap[guid] ?: 0L
                     EpisodeEntity(
-                        guid = it.guid ?: "${url}-${it.title.hashCode()}", 
-                        podcastUrl = url, 
+                        guid = guid,
+                        podcastUrl = url,
                         title = it.title,
                         description = it.description ?: "",
-                        // Use DateUtils to convert RSS string to Long timestamp
                         pubDate = it.pubDate?.let { dateStr -> DateUtils.parseRssDate(dateStr) } ?: System.currentTimeMillis(),
                         audioUrl = it.audioUrl ?: "",
-                        duration = it.duration?.toString() ?: ""
-                    ) 
+                        duration = it.duration ?: 0L,
+                        progressInMillis = savedProgress
+                    )
                 }
 
-                podcastDao.insertPodcast(podcastEntity)
+                // Step 3: Insert or update podcast (IGNORE returns -1 if exists)
+                val insertResult = podcastDao.insertPodcast(podcastEntity)
+                if (insertResult == -1L) {
+                    podcastDao.updatePodcast(url, podcastDto.title, podcastDto.imageUrl)
+                }
+
+                // Step 4: Add episodes (REPLACE with merged progress)
                 podcastDao.addEpisodes(episodeEntities)
-                
+
             } catch (e: Exception) {
-                e.printStackTrace() 
+                e.printStackTrace()
             }
         }
     }

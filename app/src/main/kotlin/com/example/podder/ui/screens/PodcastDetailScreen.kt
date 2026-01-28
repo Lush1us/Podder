@@ -47,8 +47,11 @@ fun PodcastDetailScreen(
                     supportingContent = { Text(episode.description ?: "", maxLines = 2) },
                     modifier = Modifier.clickable {
                         episode.enclosure?.url?.let { url ->
+                            // Use podcast title + episode title hash as fallback to match Repository GUID generation
+                            val guid = episode.guid ?: "${podcast.title}-${episode.title.hashCode()}"
                             viewModel.process(
                                 PodcastAction.Play(
+                                    guid = guid,
                                     url = url,
                                     title = episode.title,
                                     artist = podcast.title,

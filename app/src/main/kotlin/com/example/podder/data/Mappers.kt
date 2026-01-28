@@ -23,6 +23,6 @@ fun Episode.toEntity(podcastUrl: String): EpisodeEntity {
         description = this.description ?: "",
         pubDate = 0L, // TODO: Implement DateUtils parsing
         audioUrl = this.audioUrl ?: "",
-        duration = this.duration?.toString() ?: ""
+        duration = this.duration ?: 0L
     )
 }

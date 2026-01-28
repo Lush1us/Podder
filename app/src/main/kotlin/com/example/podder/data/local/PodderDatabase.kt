@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import com.example.podder.data.local.PodcastEntity
 import com.example.podder.data.local.EpisodeEntity
 
-@Database(entities = [PodcastEntity::class, EpisodeEntity::class, SubscriptionEntity::class], version = 2)
+@Database(entities = [PodcastEntity::class, EpisodeEntity::class, SubscriptionEntity::class], version = 4)
 abstract class PodderDatabase : RoomDatabase() {
     abstract fun podcastDao(): PodcastDao
     abstract fun subscriptionDao(): SubscriptionDao

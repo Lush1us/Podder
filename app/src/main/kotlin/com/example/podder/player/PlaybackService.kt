@@ -32,6 +32,20 @@ class PlaybackService : MediaLibraryService() {
         return mediaLibrarySession
     }
 
+    override fun onTaskRemoved(rootIntent: android.content.Intent?) {
+        // Stop playback when app is swiped away from recents
+        player?.let {
+            if (!it.playWhenReady || it.mediaItemCount == 0) {
+                stopSelf()
+            } else {
+                it.stop()
+                it.clearMediaItems()
+                stopSelf()
+            }
+        }
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onDestroy() {
         mediaLibrarySession?.run {
             player.release()

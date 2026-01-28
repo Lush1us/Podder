@@ -44,7 +44,7 @@ fun HomeScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Podder Feed") }) },
+        topBar = { TopAppBar(title = { Text("Podder") }) },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
@@ -72,7 +72,7 @@ fun HomeScreen(
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 PlayerControls(
-                    modifier = Modifier.padding(bottom = 12.dp),
+                    modifier = Modifier,
                     title = playerState.currentTitle,
                     description = playerState.description,
                     imageUrl = playerState.imageUrl,
@@ -136,6 +136,7 @@ fun EpisodeList(episodes: List<EpisodeWithPodcast>, viewModel: PodcastViewModel)
                 modifier = Modifier.clickable {
                     viewModel.process(
                         PodcastAction.Play(
+                            guid = item.episode.guid,
                             url = item.episode.audioUrl,
                             title = item.episode.title,
                             artist = item.podcast.title,
@@ -152,25 +153,8 @@ fun EpisodeList(episodes: List<EpisodeWithPodcast>, viewModel: PodcastViewModel)
     }
 }
 
-private fun formatDuration(duration: String): String {
-    // If it's just a number, treat as seconds
-    val seconds = duration.toIntOrNull()
-    if (seconds != null) {
-        return "${seconds / 60}m"
-    }
-
-    // Parse duration like "1:23:45" or "23:45" to minutes
-    val parts = duration.split(":")
-    return when (parts.size) {
-        3 -> {
-            val hours = parts[0].toIntOrNull() ?: 0
-            val minutes = parts[1].toIntOrNull() ?: 0
-            "${hours * 60 + minutes}m"
-        }
-        2 -> {
-            val minutes = parts[0].toIntOrNull() ?: 0
-            "${minutes}m"
-        }
-        else -> duration
-    }
+private fun formatDuration(durationSeconds: Long): String {
+    if (durationSeconds <= 0) return ""
+    val minutes = (durationSeconds / 60).toInt()
+    return "${minutes}m"
 }

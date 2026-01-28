@@ -26,7 +26,9 @@ data class PlayerUiState(
     val currentTitle: String = "",
     val description: String? = null,
     val imageUrl: String? = null,
-    val progress: Float = 0f
+    val progress: Float = 0f,
+    val currentEpisodeGuid: String? = null,
+    val currentPositionMillis: Long = 0L
 )
 
 class PlayerController(private val context: Context) {
@@ -72,9 +74,20 @@ class PlayerController(private val context: Context) {
         }
     }
 
-    suspend fun play(url: String, title: String, artist: String, imageUrl: String?, description: String?) = withContext(Dispatchers.Main) {
+    suspend fun play(
+        guid: String,
+        url: String,
+        title: String,
+        artist: String,
+        imageUrl: String?,
+        description: String?,
+        startPosition: Long = 0L
+    ) = withContext(Dispatchers.Main) {
         try {
             val mediaController = ensureController()
+
+            // Set current episode guid in state
+            _playerUiState.value = _playerUiState.value.copy(currentEpisodeGuid = guid)
 
             // Build Metadata for Notification
             val metadata = MediaMetadata.Builder()
@@ -89,10 +102,10 @@ class PlayerController(private val context: Context) {
                 .setMediaMetadata(metadata)
                 .build()
 
-            mediaController.setMediaItem(mediaItem)
+            mediaController.setMediaItem(mediaItem, startPosition)
             mediaController.prepare()
             mediaController.play()
-            Log.d("PlayerController", "Playing: $title by $artist")
+            Log.d("PlayerController", "Playing: $title by $artist from ${startPosition}ms")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -111,6 +124,14 @@ class PlayerController(private val context: Context) {
         }
     }
 
+    suspend fun pause() = withContext(Dispatchers.Main) {
+        try {
+            controller?.pause()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun startProgressUpdates() {
         progressJob?.cancel()
         progressJob = scope.launch {
@@ -120,7 +141,10 @@ class PlayerController(private val context: Context) {
                     val position = ctrl.currentPosition
                     if (duration > 0) {
                         val progress = (position.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
-                        _playerUiState.value = _playerUiState.value.copy(progress = progress)
+                        _playerUiState.value = _playerUiState.value.copy(
+                            progress = progress,
+                            currentPositionMillis = position
+                        )
                     }
                 }
                 delay(1000)

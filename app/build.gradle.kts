@@ -73,6 +73,9 @@ dependencies {
     implementation("androidx.room:room-ktx:2.7.0-alpha01")
     ksp("androidx.room:room-compiler:2.7.0-alpha01")
 
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:5.11.0")

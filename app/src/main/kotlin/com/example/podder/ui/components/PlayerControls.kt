@@ -4,6 +4,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
@@ -32,11 +34,15 @@ fun PlayerControls(
     isPlaying: Boolean,
     onPlayPause: () -> Unit
 ) {
+    // Calculate 2.5% of screen width for consistent margins
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val margin: Dp = screenWidth * 0.025f
+
     // Outer container for alignment at bottom center
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp), // 2.5vw margin
+            .padding(bottom = margin),
         contentAlignment = Alignment.BottomCenter
     ) {
         // Column to stack Progress Bar on top of Player Card
@@ -44,8 +50,8 @@ fun PlayerControls(
             modifier = Modifier.fillMaxWidth(0.95f), // 95vw width
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Floating Progress Bar
-            ProgressBar(progress = progress)
+            // 1. Floating Progress Bar (90vw = 90/95 of parent width)
+            ProgressBar(progress = progress, modifier = Modifier.fillMaxWidth(90f / 95f))
 
             // 2px Gap
             Spacer(modifier = Modifier.height(2.dp))
@@ -117,14 +123,12 @@ fun PlayerControls(
 }
 
 @Composable
-private fun ProgressBar(progress: Float) {
+private fun ProgressBar(progress: Float, modifier: Modifier = Modifier) {
     val barColor = Color(0xFFFF9800) // Orange for elapsed time
     val trackColor = Color.White
 
     Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(6.dp)
+        modifier = modifier.height(6.dp)
     ) {
         val strokeWidth = 3.dp.toPx() // Increased thickness
         val yPos = size.height / 2
