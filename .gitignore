@@ -30,3 +30,6 @@ podcast_error.log
 # Gemini specific
 GEMINI.md
 notebookLM/
+
+# Scripts
+ingest.py

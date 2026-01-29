@@ -24,11 +24,13 @@ import kotlinx.coroutines.withContext
 data class PlayerUiState(
     val isPlaying: Boolean = false,
     val currentTitle: String = "",
+    val artist: String? = null,
     val description: String? = null,
     val imageUrl: String? = null,
     val progress: Float = 0f,
     val currentEpisodeGuid: String? = null,
-    val currentPositionMillis: Long = 0L
+    val currentPositionMillis: Long = 0L,
+    val durationMillis: Long = 0L
 )
 
 class PlayerController(private val context: Context) {
@@ -52,6 +54,7 @@ class PlayerController(private val context: Context) {
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
             _playerUiState.value = _playerUiState.value.copy(
                 currentTitle = mediaMetadata.title?.toString() ?: "",
+                artist = mediaMetadata.artist?.toString(),
                 description = mediaMetadata.description?.toString(),
                 imageUrl = mediaMetadata.artworkUri?.toString()
             )
@@ -143,7 +146,8 @@ class PlayerController(private val context: Context) {
                         val progress = (position.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
                         _playerUiState.value = _playerUiState.value.copy(
                             progress = progress,
-                            currentPositionMillis = position
+                            currentPositionMillis = position,
+                            durationMillis = duration
                         )
                     }
                 }

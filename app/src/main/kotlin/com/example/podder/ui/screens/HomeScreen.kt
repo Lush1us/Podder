@@ -25,6 +25,7 @@ import coil.compose.AsyncImage
 import com.example.podder.R
 import com.example.podder.core.PodcastAction
 import com.example.podder.data.local.EpisodeWithPodcast
+import com.example.podder.ui.Episode
 import com.example.podder.ui.components.PlayerControls
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,6 +78,8 @@ fun HomeScreen(
                     description = playerState.description,
                     imageUrl = playerState.imageUrl,
                     progress = playerState.progress,
+                    elapsedMillis = playerState.currentPositionMillis,
+                    durationMillis = playerState.durationMillis,
                     isPlaying = playerState.isPlaying,
                     onPlayPause = {
                         viewModel.process(
@@ -85,6 +88,9 @@ fun HomeScreen(
                                 timestamp = System.currentTimeMillis()
                             )
                         )
+                    },
+                    onPlayerClick = {
+                        navController.navigate(Episode)
                     }
                 )
             }
