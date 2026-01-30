@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -102,65 +103,113 @@ fun HomeScreen(
 fun EpisodeList(episodes: List<EpisodeWithPodcast>, viewModel: PodcastViewModel) {
     LazyColumn {
         items(episodes) { item ->
-            ListItem(
-                leadingContent = {
-                    AsyncImage(
-                        model = item.podcast.imageUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color.Gray)
-                    )
-                },
-                headlineContent = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        viewModel.process(
+                            PodcastAction.Play(
+                                guid = item.episode.guid,
+                                url = item.episode.audioUrl,
+                                title = item.episode.title,
+                                artist = item.podcast.title,
+                                imageUrl = item.podcast.imageUrl,
+                                description = item.episode.description,
+                                source = "HomeScreen",
+                                timestamp = System.currentTimeMillis()
+                            )
+                        )
+                    }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Podcast image
+                AsyncImage(
+                    model = item.podcast.imageUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color.Gray)
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Text content
+                Column(modifier = Modifier.weight(1f)) {
+                    // Episode title
                     Text(
                         text = item.episode.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        lineHeight = 18.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                },
-                supportingContent = {
-                    Text(
-                        text = item.episode.description ?: "",
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                trailingContent = {
-                    Text(
-                        text = formatDuration(item.episode.duration),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.background
-                ),
-                modifier = Modifier.clickable {
-                    viewModel.process(
-                        PodcastAction.Play(
-                            guid = item.episode.guid,
-                            url = item.episode.audioUrl,
-                            title = item.episode.title,
-                            artist = item.podcast.title,
-                            imageUrl = item.podcast.imageUrl,
-                            description = item.episode.description,
-                            source = "HomeScreen",
-                            timestamp = System.currentTimeMillis()
+
+                    // Bottom row: channel/date on left, duration on right
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = item.podcast.title,
+                                fontSize = 10.sp,
+                                lineHeight = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = formatPubDate(item.episode.pubDate),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Text(
+                            text = formatDurationWithProgress(item.episode.duration, item.episode.progressInMillis),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    )
+                    }
                 }
-            )
+            }
             HorizontalDivider()
         }
     }
 }
 
-private fun formatDuration(durationSeconds: Long): String {
+private fun formatPubDate(pubDateMillis: Long): String {
+    if (pubDateMillis <= 0) return ""
+    val now = System.currentTimeMillis()
+    val today = java.util.Calendar.getInstance().apply {
+        set(java.util.Calendar.HOUR_OF_DAY, 0)
+        set(java.util.Calendar.MINUTE, 0)
+        set(java.util.Calendar.SECOND, 0)
+        set(java.util.Calendar.MILLISECOND, 0)
+    }.timeInMillis
+    val yesterday = today - 24 * 60 * 60 * 1000
+
+    return when {
+        pubDateMillis >= today -> "Today"
+        pubDateMillis >= yesterday -> "Yesterday"
+        else -> {
+            val sdf = java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault())
+            sdf.format(java.util.Date(pubDateMillis))
+        }
+    }
+}
+
+private fun formatDurationWithProgress(durationSeconds: Long, progressMillis: Long): String {
     if (durationSeconds <= 0) return ""
-    val minutes = (durationSeconds / 60).toInt()
-    return "${minutes}m"
+    val totalMinutes = (durationSeconds / 60).toInt()
+    return if (progressMillis > 0) {
+        val elapsedMinutes = (progressMillis / 60000).toInt()
+        "${elapsedMinutes}/${totalMinutes}m"
+    } else {
+        "${totalMinutes}m"
+    }
 }
