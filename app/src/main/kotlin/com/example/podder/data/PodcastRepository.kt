@@ -60,6 +60,14 @@ class PodcastRepository(
         podcastDao.getEpisode(guid)
     }
 
+    fun getEpisodesByPodcast(podcastUrl: String): Flow<List<EpisodeWithPodcast>> {
+        return podcastDao.getEpisodesByPodcast(podcastUrl)
+    }
+
+    suspend fun getPodcast(url: String): PodcastEntity? = withContext(Dispatchers.IO) {
+        podcastDao.getPodcast(url)
+    }
+
     suspend fun updatePodcasts() = withContext(Dispatchers.IO) {
         // Skip network fetch if we already have cached episodes
         if (podcastDao.getEpisodeCount() > 0) return@withContext

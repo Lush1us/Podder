@@ -133,6 +133,7 @@ private fun FinishedEpisodeRow(item: EpisodeWithPodcast, viewModel: PodcastViewM
                         artist = item.podcast.title,
                         imageUrl = item.podcast.imageUrl,
                         description = item.episode.description,
+                        podcastUrl = item.podcast.url,
                         source = "HomeScreen",
                         timestamp = System.currentTimeMillis()
                     )
@@ -183,6 +184,7 @@ private fun RegularEpisodeRow(item: EpisodeWithPodcast, viewModel: PodcastViewMo
                         artist = item.podcast.title,
                         imageUrl = item.podcast.imageUrl,
                         description = item.episode.description,
+                        podcastUrl = item.podcast.url,
                         source = "HomeScreen",
                         timestamp = System.currentTimeMillis()
                     )

@@ -11,6 +11,7 @@ sealed interface PodcastAction : Traceable {
         val artist: String,
         val imageUrl: String?,
         val description: String?,
+        val podcastUrl: String?,
         override val source: String,
         override val timestamp: Long
     ) : PodcastAction

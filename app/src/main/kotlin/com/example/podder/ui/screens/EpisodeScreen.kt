@@ -3,6 +3,7 @@ package com.example.podder.ui.screens
 import android.text.Html
 import android.text.style.URLSpan
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
@@ -30,13 +31,16 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.podder.player.PlayerUiState
 
+private val OrangeLink = Color(0xFFFF9800)
+
 @Composable
 fun EpisodeScreen(
     playerState: PlayerUiState,
     onBack: () -> Unit,
     onPlayPause: () -> Unit,
     onSeekBack: () -> Unit,
-    onSeekForward: () -> Unit
+    onSeekForward: () -> Unit,
+    onChannelClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -149,12 +153,15 @@ fun EpisodeScreen(
                 style = MaterialTheme.typography.headlineSmall
             )
 
-            // Podcast name (artist)
+            // Podcast name (artist) - clickable link to channel
             playerState.artist?.let { artist ->
                 Text(
                     text = artist,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = OrangeLink,
+                    modifier = Modifier.clickable {
+                        playerState.podcastUrl?.let { onChannelClick(it) }
+                    }
                 )
             }
 

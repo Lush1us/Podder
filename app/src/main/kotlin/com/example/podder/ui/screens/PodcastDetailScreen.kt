@@ -57,6 +57,7 @@ fun PodcastDetailScreen(
                                     artist = podcast.title,
                                     imageUrl = podcast.imageUrl,
                                     description = episode.description,
+                                    podcastUrl = null, // Legacy screen - not used
                                     source = "PodcastDetailScreen",
                                     timestamp = System.currentTimeMillis()
                                 )

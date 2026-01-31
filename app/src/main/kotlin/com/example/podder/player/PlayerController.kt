@@ -30,7 +30,8 @@ data class PlayerUiState(
     val progress: Float = 0f,
     val currentEpisodeGuid: String? = null,
     val currentPositionMillis: Long = 0L,
-    val durationMillis: Long = 0L
+    val durationMillis: Long = 0L,
+    val podcastUrl: String? = null
 )
 
 class PlayerController(private val context: Context) {
@@ -84,13 +85,17 @@ class PlayerController(private val context: Context) {
         artist: String,
         imageUrl: String?,
         description: String?,
+        podcastUrl: String?,
         startPosition: Long = 0L
     ) = withContext(Dispatchers.Main) {
         try {
             val mediaController = ensureController()
 
-            // Set current episode guid in state
-            _playerUiState.value = _playerUiState.value.copy(currentEpisodeGuid = guid)
+            // Set current episode guid and podcast url in state
+            _playerUiState.value = _playerUiState.value.copy(
+                currentEpisodeGuid = guid,
+                podcastUrl = podcastUrl
+            )
 
             // Build Metadata for Notification
             val metadata = MediaMetadata.Builder()

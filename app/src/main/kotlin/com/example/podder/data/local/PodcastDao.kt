@@ -35,4 +35,11 @@ interface PodcastDao {
 
     @Query("SELECT guid, progressInMillis FROM episodes")
     suspend fun getAllProgress(): List<EpisodeProgress>
+
+    @Transaction
+    @Query("SELECT * FROM episodes WHERE podcastUrl = :podcastUrl ORDER BY pubDate DESC")
+    fun getEpisodesByPodcast(podcastUrl: String): Flow<List<EpisodeWithPodcast>>
+
+    @Query("SELECT * FROM podcasts WHERE url = :url")
+    suspend fun getPodcast(url: String): PodcastEntity?
 }

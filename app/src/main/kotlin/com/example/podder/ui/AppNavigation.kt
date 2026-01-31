@@ -8,10 +8,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.podder.core.PodcastAction
+import com.example.podder.ui.screens.ChannelScreen
 import com.example.podder.ui.screens.EpisodeScreen
 import com.example.podder.ui.screens.HomeScreen
 import com.example.podder.ui.screens.PodcastDetailScreen
 import com.example.podder.ui.screens.PodcastViewModel
+import java.net.URLDecoder
+import java.net.URLEncoder
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -22,6 +25,9 @@ object Episode
 
 @Serializable
 data class PodcastDetails(val title: String)
+
+@Serializable
+data class Channel(val podcastUrl: String)
 
 @Composable
 fun AppNavigation(viewModel: PodcastViewModel) {
@@ -43,7 +49,18 @@ fun AppNavigation(viewModel: PodcastViewModel) {
                 },
                 onSeekForward = {
                     viewModel.process(PodcastAction.SeekForward("EpisodeScreen", System.currentTimeMillis()))
+                },
+                onChannelClick = { podcastUrl ->
+                    navController.navigate(Channel(podcastUrl))
                 }
+            )
+        }
+        composable<Channel> { backStackEntry ->
+            val channel = backStackEntry.toRoute<Channel>()
+            ChannelScreen(
+                podcastUrl = channel.podcastUrl,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
             )
         }
         /*

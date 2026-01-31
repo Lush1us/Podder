@@ -40,6 +40,8 @@ class PodcastViewModel(
 
     val playerUiState: StateFlow<PlayerUiState> = playerController.playerUiState
 
+    fun getEpisodesByPodcast(podcastUrl: String) = repository.getEpisodesByPodcast(podcastUrl)
+
     init {
         observePlayerForProgressSaving()
     }
@@ -98,6 +100,7 @@ class PodcastViewModel(
                         artist = action.artist,
                         imageUrl = action.imageUrl,
                         description = action.description,
+                        podcastUrl = action.podcastUrl,
                         startPosition = startPosition
                     )
                 }
