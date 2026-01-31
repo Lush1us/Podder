@@ -112,7 +112,17 @@ class PodcastViewModel(
                     playerController.pause()
                 }
             }
-            else -> {}
+            is PodcastAction.SeekBack -> {
+                viewModelScope.launch {
+                    playerController.seekBack()
+                }
+            }
+            is PodcastAction.SeekForward -> {
+                viewModelScope.launch {
+                    playerController.seekForward()
+                }
+            }
+            is PodcastAction.FetchPodcast -> { /* Not used */ }
         }
     }
 

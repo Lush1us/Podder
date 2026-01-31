@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.podder.core.PodcastAction
 import com.example.podder.ui.screens.EpisodeScreen
 import com.example.podder.ui.screens.HomeScreen
 import com.example.podder.ui.screens.PodcastDetailScreen
@@ -33,7 +34,16 @@ fun AppNavigation(viewModel: PodcastViewModel) {
             val playerState by viewModel.playerUiState.collectAsStateWithLifecycle()
             EpisodeScreen(
                 playerState = playerState,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onPlayPause = {
+                    viewModel.process(PodcastAction.TogglePlayPause("EpisodeScreen", System.currentTimeMillis()))
+                },
+                onSeekBack = {
+                    viewModel.process(PodcastAction.SeekBack("EpisodeScreen", System.currentTimeMillis()))
+                },
+                onSeekForward = {
+                    viewModel.process(PodcastAction.SeekForward("EpisodeScreen", System.currentTimeMillis()))
+                }
             )
         }
         /*

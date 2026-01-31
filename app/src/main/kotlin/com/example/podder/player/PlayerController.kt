@@ -135,6 +135,22 @@ class PlayerController(private val context: Context) {
         }
     }
 
+    suspend fun seekBack() = withContext(Dispatchers.Main) {
+        try {
+            controller?.seekBack()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun seekForward() = withContext(Dispatchers.Main) {
+        try {
+            controller?.seekForward()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun startProgressUpdates() {
         progressJob?.cancel()
         progressJob = scope.launch {
