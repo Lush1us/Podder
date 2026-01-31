@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -103,81 +105,137 @@ fun HomeScreen(
 fun EpisodeList(episodes: List<EpisodeWithPodcast>, viewModel: PodcastViewModel) {
     LazyColumn {
         items(episodes) { item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        viewModel.process(
-                            PodcastAction.Play(
-                                guid = item.episode.guid,
-                                url = item.episode.audioUrl,
-                                title = item.episode.title,
-                                artist = item.podcast.title,
-                                imageUrl = item.podcast.imageUrl,
-                                description = item.episode.description,
-                                source = "HomeScreen",
-                                timestamp = System.currentTimeMillis()
-                            )
-                        )
-                    }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Podcast image
-                AsyncImage(
-                    model = item.podcast.imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(Color.Gray)
+            val isFinished = item.episode.duration > 0 &&
+                item.episode.progressInMillis >= item.episode.duration * 1000
+
+            if (isFinished) {
+                FinishedEpisodeRow(item, viewModel)
+            } else {
+                RegularEpisodeRow(item, viewModel)
+            }
+            HorizontalDivider()
+        }
+    }
+}
+
+@Composable
+private fun FinishedEpisodeRow(item: EpisodeWithPodcast, viewModel: PodcastViewModel) {
+    val grayColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                viewModel.process(
+                    PodcastAction.Play(
+                        guid = item.episode.guid,
+                        url = item.episode.audioUrl,
+                        title = item.episode.title,
+                        artist = item.podcast.title,
+                        imageUrl = item.podcast.imageUrl,
+                        description = item.episode.description,
+                        source = "HomeScreen",
+                        timestamp = System.currentTimeMillis()
+                    )
                 )
+            }
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            model = item.podcast.imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(28.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(Color.Gray)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = item.episode.title,
+            style = MaterialTheme.typography.bodySmall,
+            color = grayColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Icon(
+            imageVector = Icons.Filled.Check,
+            contentDescription = "Finished",
+            tint = grayColor,
+            modifier = Modifier.size(16.dp)
+        )
+    }
+}
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Text content
+@Composable
+private fun RegularEpisodeRow(item: EpisodeWithPodcast, viewModel: PodcastViewModel) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                viewModel.process(
+                    PodcastAction.Play(
+                        guid = item.episode.guid,
+                        url = item.episode.audioUrl,
+                        title = item.episode.title,
+                        artist = item.podcast.title,
+                        imageUrl = item.podcast.imageUrl,
+                        description = item.episode.description,
+                        source = "HomeScreen",
+                        timestamp = System.currentTimeMillis()
+                    )
+                )
+            }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            model = item.podcast.imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color.Gray)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = item.episode.title,
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = 18.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    // Episode title
                     Text(
-                        text = item.episode.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        lineHeight = 18.sp,
+                        text = item.podcast.title,
+                        fontSize = 10.sp,
+                        lineHeight = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-
-                    // Bottom row: channel/date on left, duration on right
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = item.podcast.title,
-                                fontSize = 10.sp,
-                                lineHeight = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = formatPubDate(item.episode.pubDate),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Text(
-                            text = formatDurationWithProgress(item.episode.duration, item.episode.progressInMillis),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = formatPubDate(item.episode.pubDate),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
+                Text(
+                    text = formatDurationWithProgress(item.episode.duration, item.episode.progressInMillis),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            HorizontalDivider()
         }
     }
 }

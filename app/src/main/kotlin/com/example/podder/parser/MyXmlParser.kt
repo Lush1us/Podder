@@ -99,11 +99,33 @@ class MyXmlParser {
         return guid
     }
 
-    private fun readDuration(parser: XmlPullParser): Long? { // Added readDuration
+    private fun readDuration(parser: XmlPullParser): Long? {
         parser.require(XmlPullParser.START_TAG, ns, "itunes:duration")
         val durationString = readText(parser)
         parser.require(XmlPullParser.END_TAG, ns, "itunes:duration")
-        return durationString.toLongOrNull()
+        return parseDuration(durationString)
+    }
+
+    private fun parseDuration(durationString: String): Long? {
+        // Try parsing as raw seconds first
+        durationString.toLongOrNull()?.let { return it }
+
+        // Parse HH:MM:SS or MM:SS format
+        val parts = durationString.split(":")
+        return when (parts.size) {
+            3 -> {
+                val hours = parts[0].toLongOrNull() ?: return null
+                val minutes = parts[1].toLongOrNull() ?: return null
+                val seconds = parts[2].toLongOrNull() ?: return null
+                hours * 3600 + minutes * 60 + seconds
+            }
+            2 -> {
+                val minutes = parts[0].toLongOrNull() ?: return null
+                val seconds = parts[1].toLongOrNull() ?: return null
+                minutes * 60 + seconds
+            }
+            else -> null
+        }
     }
 
     private fun readImageUrl(parser: XmlPullParser): String? { // Added readImageUrl

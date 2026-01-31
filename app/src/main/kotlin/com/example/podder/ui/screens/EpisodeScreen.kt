@@ -1,16 +1,25 @@
 package com.example.podder.ui.screens
 
+import android.text.Html
+import android.text.style.URLSpan
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.podder.player.PlayerUiState
@@ -88,13 +97,40 @@ fun EpisodeScreen(
 
                 // Description
                 playerState.description?.let { description ->
+                    val uriHandler = LocalUriHandler.current
+                    val linkColor = MaterialTheme.colorScheme.primary
+                    val textColor = MaterialTheme.colorScheme.onSurface
+                    val annotatedText = remember(description) {
+                        htmlToAnnotatedString(description, linkColor)
+                    }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodyMedium
+                    ClickableText(
+                        text = annotatedText,
+                        style = MaterialTheme.typography.bodyMedium.copy(color = textColor),
+                        onClick = { offset ->
+                            annotatedText.getStringAnnotations("URL", offset, offset)
+                                .firstOrNull()?.let { uriHandler.openUri(it.item) }
+                        }
                     )
                 }
             }
+        }
+    }
+}
+
+private fun htmlToAnnotatedString(html: String, linkColor: Color): AnnotatedString {
+    val spanned = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+    return buildAnnotatedString {
+        append(spanned.toString())
+        spanned.getSpans(0, spanned.length, URLSpan::class.java).forEach { urlSpan ->
+            val start = spanned.getSpanStart(urlSpan)
+            val end = spanned.getSpanEnd(urlSpan)
+            addStyle(
+                SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline),
+                start,
+                end
+            )
+            addStringAnnotation("URL", urlSpan.url, start, end)
         }
     }
 }
