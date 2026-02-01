@@ -3,14 +3,19 @@ package com.example.podder.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,7 +44,17 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val playerState by viewModel.playerUiState.collectAsStateWithLifecycle()
+    val downloadStates by viewModel.downloadStates.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // Selection state
+    var selectedEpisode by remember { mutableStateOf<EpisodeWithPodcast?>(null) }
+
+    // Optimistic UI: track episodes being marked as finished (before DB update)
+    var pendingFinishedGuids by remember { mutableStateOf(setOf<String>()) }
+
+    // Get download state for selected episode
+    val selectedDownloadState = selectedEpisode?.let { downloadStates[it.episode.guid] }
 
     LaunchedEffect(Unit) {
         // Initialize subscriptions from OPML file
@@ -48,23 +63,123 @@ fun HomeScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Podder") }) },
+        topBar = {
+            if (selectedEpisode != null) {
+                // Selection toolbar
+                TopAppBar(
+                    title = { Text("1 selected") },
+                    navigationIcon = {
+                        IconButton(onClick = { selectedEpisode = null }) {
+                            Icon(Icons.Filled.Close, contentDescription = "Clear selection")
+                        }
+                    },
+                    actions = {
+                        // Download button with state
+                        when (selectedDownloadState) {
+                            DownloadState.DOWNLOADING -> {
+                                Box(
+                                    modifier = Modifier.size(48.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                }
+                            }
+                            DownloadState.COMPLETED -> {
+                                Box(
+                                    modifier = Modifier.size(48.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        Icons.Filled.DownloadDone,
+                                        contentDescription = "Download complete",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                            null -> {
+                                // Show download button only if not already downloaded
+                                if (selectedEpisode?.episode?.localFilePath == null) {
+                                    IconButton(
+                                        onClick = {
+                                            selectedEpisode?.let { episode ->
+                                                viewModel.process(
+                                                    PodcastAction.Download(
+                                                        guid = episode.episode.guid,
+                                                        url = episode.episode.audioUrl,
+                                                        title = episode.episode.title,
+                                                        source = "HomeScreen",
+                                                        timestamp = System.currentTimeMillis()
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    ) {
+                                        Icon(Icons.Filled.Download, contentDescription = "Download episode")
+                                    }
+                                }
+                            }
+                        }
+                        // Mark as finished button
+                        IconButton(
+                            onClick = {
+                                selectedEpisode?.let { episode ->
+                                    // Optimistic UI update - show as finished immediately
+                                    pendingFinishedGuids = pendingFinishedGuids + episode.episode.guid
+
+                                    // Then update database
+                                    viewModel.process(
+                                        PodcastAction.MarkAsFinished(
+                                            guid = episode.episode.guid,
+                                            durationSeconds = episode.episode.duration,
+                                            source = "HomeScreen",
+                                            timestamp = System.currentTimeMillis()
+                                        )
+                                    )
+                                    selectedEpisode = null
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Filled.CheckCircle, contentDescription = "Mark as finished")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                )
+            } else {
+                TopAppBar(title = { Text("Podder") })
+            }
+        },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val state = uiState) {
                 is HomeUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
                 }
                 is HomeUiState.Error -> {
-                    Text(
-                        text = state.message,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = state.message,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
                 }
                 is HomeUiState.Success -> {
-                    EpisodeList(episodes = state.feed, viewModel = viewModel)
+                    EpisodeList(
+                        episodes = state.feed,
+                        viewModel = viewModel,
+                        selectedEpisode = selectedEpisode,
+                        onEpisodeSelected = { selectedEpisode = it },
+                        onClearSelection = { selectedEpisode = null },
+                        pendingFinishedGuids = pendingFinishedGuids
+                    )
                 }
             }
 
@@ -94,6 +209,15 @@ fun HomeScreen(
                     },
                     onPlayerClick = {
                         navController.navigate(Episode)
+                    },
+                    onSeekTo = { positionMillis ->
+                        viewModel.process(
+                            PodcastAction.SeekTo(
+                                positionMillis = positionMillis,
+                                source = "HomeScreen",
+                                timestamp = System.currentTimeMillis()
+                            )
+                        )
                     }
                 )
             }
@@ -102,43 +226,85 @@ fun HomeScreen(
 }
 
 @Composable
-fun EpisodeList(episodes: List<EpisodeWithPodcast>, viewModel: PodcastViewModel) {
+fun EpisodeList(
+    episodes: List<EpisodeWithPodcast>,
+    viewModel: PodcastViewModel,
+    selectedEpisode: EpisodeWithPodcast?,
+    onEpisodeSelected: (EpisodeWithPodcast) -> Unit,
+    onClearSelection: () -> Unit,
+    pendingFinishedGuids: Set<String> = emptySet()
+) {
     LazyColumn {
-        items(episodes) { item ->
-            val isFinished = item.episode.duration > 0 &&
+        items(episodes, key = { it.episode.guid }) { item ->
+            // Check both database state AND optimistic UI state
+            val isFinishedInDb = item.episode.duration > 0 &&
                 item.episode.progressInMillis >= item.episode.duration * 1000
+            val isFinished = isFinishedInDb || pendingFinishedGuids.contains(item.episode.guid)
+            val isSelected = selectedEpisode?.episode?.guid == item.episode.guid
 
             if (isFinished) {
-                FinishedEpisodeRow(item, viewModel)
+                FinishedEpisodeRow(
+                    item = item,
+                    viewModel = viewModel,
+                    isSelected = isSelected,
+                    onLongPress = { onEpisodeSelected(item) },
+                    onClearSelection = onClearSelection
+                )
             } else {
-                RegularEpisodeRow(item, viewModel)
+                RegularEpisodeRow(
+                    item = item,
+                    viewModel = viewModel,
+                    isSelected = isSelected,
+                    onLongPress = { onEpisodeSelected(item) },
+                    onClearSelection = onClearSelection
+                )
             }
             HorizontalDivider()
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FinishedEpisodeRow(item: EpisodeWithPodcast, viewModel: PodcastViewModel) {
+private fun FinishedEpisodeRow(
+    item: EpisodeWithPodcast,
+    viewModel: PodcastViewModel,
+    isSelected: Boolean,
+    onLongPress: () -> Unit,
+    onClearSelection: () -> Unit
+) {
     val grayColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+    val backgroundColor = if (isSelected) {
+        MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        Color.Transparent
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                viewModel.process(
-                    PodcastAction.Play(
-                        guid = item.episode.guid,
-                        url = item.episode.audioUrl,
-                        title = item.episode.title,
-                        artist = item.podcast.title,
-                        imageUrl = item.podcast.imageUrl,
-                        description = item.episode.description,
-                        podcastUrl = item.podcast.url,
-                        source = "HomeScreen",
-                        timestamp = System.currentTimeMillis()
-                    )
-                )
-            }
+            .background(backgroundColor)
+            .combinedClickable(
+                onClick = {
+                    if (isSelected) {
+                        onClearSelection()
+                    } else {
+                        viewModel.process(
+                            PodcastAction.Play(
+                                guid = item.episode.guid,
+                                url = item.episode.audioUrl,
+                                title = item.episode.title,
+                                artist = item.podcast.title,
+                                imageUrl = item.podcast.imageUrl,
+                                description = item.episode.description,
+                                podcastUrl = item.podcast.url,
+                                source = "HomeScreen",
+                                timestamp = System.currentTimeMillis()
+                            )
+                        )
+                    }
+                },
+                onLongClick = onLongPress
+            )
             .padding(horizontal = 16.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -161,6 +327,15 @@ private fun FinishedEpisodeRow(item: EpisodeWithPodcast, viewModel: PodcastViewM
             modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(8.dp))
+        if (item.episode.localFilePath != null) {
+            Icon(
+                imageVector = Icons.Filled.DownloadDone,
+                contentDescription = "Downloaded",
+                tint = grayColor,
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
         Icon(
             imageVector = Icons.Filled.Check,
             contentDescription = "Finished",
@@ -170,26 +345,46 @@ private fun FinishedEpisodeRow(item: EpisodeWithPodcast, viewModel: PodcastViewM
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun RegularEpisodeRow(item: EpisodeWithPodcast, viewModel: PodcastViewModel) {
+private fun RegularEpisodeRow(
+    item: EpisodeWithPodcast,
+    viewModel: PodcastViewModel,
+    isSelected: Boolean,
+    onLongPress: () -> Unit,
+    onClearSelection: () -> Unit
+) {
+    val backgroundColor = if (isSelected) {
+        MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        Color.Transparent
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                viewModel.process(
-                    PodcastAction.Play(
-                        guid = item.episode.guid,
-                        url = item.episode.audioUrl,
-                        title = item.episode.title,
-                        artist = item.podcast.title,
-                        imageUrl = item.podcast.imageUrl,
-                        description = item.episode.description,
-                        podcastUrl = item.podcast.url,
-                        source = "HomeScreen",
-                        timestamp = System.currentTimeMillis()
-                    )
-                )
-            }
+            .background(backgroundColor)
+            .combinedClickable(
+                onClick = {
+                    if (isSelected) {
+                        onClearSelection()
+                    } else {
+                        viewModel.process(
+                            PodcastAction.Play(
+                                guid = item.episode.guid,
+                                url = item.episode.audioUrl,
+                                title = item.episode.title,
+                                artist = item.podcast.title,
+                                imageUrl = item.podcast.imageUrl,
+                                description = item.episode.description,
+                                podcastUrl = item.podcast.url,
+                                source = "HomeScreen",
+                                timestamp = System.currentTimeMillis()
+                            )
+                        )
+                    }
+                },
+                onLongClick = onLongPress
+            )
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -232,11 +427,22 @@ private fun RegularEpisodeRow(item: EpisodeWithPodcast, viewModel: PodcastViewMo
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Text(
-                    text = formatDurationWithProgress(item.episode.duration, item.episode.progressInMillis),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (item.episode.localFilePath != null) {
+                        Icon(
+                            imageVector = Icons.Filled.DownloadDone,
+                            contentDescription = "Downloaded",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
+                    Text(
+                        text = formatDurationWithProgress(item.episode.duration, item.episode.progressInMillis),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

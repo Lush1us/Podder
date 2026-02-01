@@ -91,10 +91,14 @@ class PlayerController(private val context: Context) {
         try {
             val mediaController = ensureController()
 
-            // Set current episode guid and podcast url in state
+            // Set current episode guid, podcast url, and reset position atomically
+            // This prevents the progress observer from seeing old position with new GUID
             _playerUiState.value = _playerUiState.value.copy(
                 currentEpisodeGuid = guid,
-                podcastUrl = podcastUrl
+                podcastUrl = podcastUrl,
+                currentPositionMillis = startPosition,
+                durationMillis = 0L,
+                progress = 0f
             )
 
             // Build Metadata for Notification
@@ -151,6 +155,14 @@ class PlayerController(private val context: Context) {
     suspend fun seekForward() = withContext(Dispatchers.Main) {
         try {
             controller?.seekForward()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun seekTo(positionMillis: Long) = withContext(Dispatchers.Main) {
+        try {
+            controller?.seekTo(positionMillis)
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -1,5 +1,12 @@
 package com.example.podder.data
 
+import android.content.Context
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.podder.data.local.PodcastDao
 import com.example.podder.data.local.SubscriptionDao
 import com.example.podder.data.local.PodcastEntity
@@ -7,6 +14,7 @@ import com.example.podder.data.local.EpisodeEntity
 import com.example.podder.data.local.EpisodeWithPodcast
 import com.example.podder.parser.MyXmlParser
 import com.example.podder.parser.OpmlParser
+import com.example.podder.sync.DownloadEpisodeWorker
 import com.example.podder.utils.DateUtils
 import java.io.InputStream
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +32,8 @@ interface PodcastService {
 
 class PodcastRepository(
     private val podcastDao: PodcastDao,
-    private val subscriptionDao: SubscriptionDao
+    private val subscriptionDao: SubscriptionDao,
+    private val context: Context? = null
 ) {
     private val service: PodcastService
     private val xmlParser = MyXmlParser()
@@ -69,15 +78,18 @@ class PodcastRepository(
     }
 
     suspend fun updatePodcasts() = withContext(Dispatchers.IO) {
-        // Skip network fetch if we already have cached episodes
-        if (podcastDao.getEpisodeCount() > 0) return@withContext
+        // Always refresh - UI already shows cached data instantly via Room Flow
         forceRefresh()
     }
 
-    suspend fun forceRefresh() = withContext(Dispatchers.IO) {
-        // Step 1: Get existing progress before sync
+    suspend fun forceRefresh(): List<EpisodeEntity> = withContext(Dispatchers.IO) {
+        val allNewEpisodes = mutableListOf<EpisodeEntity>()
+
+        // Step 1: Get existing progress and downloads before sync
         val progressMap = podcastDao.getAllProgress()
             .associate { it.guid to it.progressInMillis }
+        val downloadMap = podcastDao.getAllDownloads()
+            .associate { it.guid to it.localFilePath }
 
         val urls = subscriptionDao.getAllUrls()
         for (url in urls) {
@@ -87,11 +99,12 @@ class PodcastRepository(
 
                 val podcastEntity = PodcastEntity(url, podcastDto.title, podcastDto.imageUrl)
 
-                // Step 2: Merge progress into new episodes
+                // Step 2: Merge progress and downloads into new episodes
                 val episodeEntities = podcastDto.episodes.map {
                     // Use podcast title + episode title hash as fallback to match UI GUID generation
                     val guid = it.guid ?: "${podcastDto.title}-${it.title.hashCode()}"
                     val savedProgress = progressMap[guid] ?: 0L
+                    val savedLocalPath = downloadMap[guid]
                     EpisodeEntity(
                         guid = guid,
                         podcastUrl = url,
@@ -100,22 +113,61 @@ class PodcastRepository(
                         pubDate = it.pubDate?.let { dateStr -> DateUtils.parseRssDate(dateStr) } ?: System.currentTimeMillis(),
                         audioUrl = it.audioUrl ?: "",
                         duration = it.duration ?: 0L,
-                        progressInMillis = savedProgress
+                        progressInMillis = savedProgress,
+                        localFilePath = savedLocalPath
                     )
                 }
 
-                // Step 3: Insert or update podcast (IGNORE returns -1 if exists)
+                // Step 3: Identify new episodes (not in progressMap AND published within 24 hours)
+                val twentyFourHoursAgo = System.currentTimeMillis() - (24 * 60 * 60 * 1000)
+                val newEpisodes = episodeEntities.filter { episode ->
+                    !progressMap.containsKey(episode.guid) && episode.pubDate > twentyFourHoursAgo
+                }
+                allNewEpisodes.addAll(newEpisodes)
+
+                // Step 4: Insert or update podcast (IGNORE returns -1 if exists)
                 val insertResult = podcastDao.insertPodcast(podcastEntity)
                 if (insertResult == -1L) {
                     podcastDao.updatePodcast(url, podcastDto.title, podcastDto.imageUrl)
                 }
 
-                // Step 4: Add episodes (REPLACE with merged progress)
+                // Step 5: Add episodes (REPLACE with merged progress)
                 podcastDao.addEpisodes(episodeEntities)
 
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+
+        allNewEpisodes
+    }
+
+    suspend fun setLocalFile(guid: String, path: String) = withContext(Dispatchers.IO) {
+        podcastDao.updateLocalFile(guid, path)
+    }
+
+    fun downloadEpisode(guid: String, url: String, title: String) {
+        val ctx = context ?: return
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val inputData = workDataOf(
+            DownloadEpisodeWorker.KEY_GUID to guid,
+            DownloadEpisodeWorker.KEY_AUDIO_URL to url,
+            DownloadEpisodeWorker.KEY_EPISODE_TITLE to title
+        )
+
+        val downloadRequest = OneTimeWorkRequestBuilder<DownloadEpisodeWorker>()
+            .setConstraints(constraints)
+            .setInputData(inputData)
+            .build()
+
+        WorkManager.getInstance(ctx).enqueueUniqueWork(
+            "download_$guid",
+            ExistingWorkPolicy.KEEP,
+            downloadRequest
+        )
     }
 }

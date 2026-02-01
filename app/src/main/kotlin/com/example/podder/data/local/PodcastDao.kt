@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 data class EpisodeProgress(val guid: String, val progressInMillis: Long)
+data class EpisodeDownload(val guid: String, val localFilePath: String?)
 
 @Dao
 interface PodcastDao {
@@ -36,10 +37,16 @@ interface PodcastDao {
     @Query("SELECT guid, progressInMillis FROM episodes")
     suspend fun getAllProgress(): List<EpisodeProgress>
 
+    @Query("SELECT guid, localFilePath FROM episodes WHERE localFilePath IS NOT NULL")
+    suspend fun getAllDownloads(): List<EpisodeDownload>
+
     @Transaction
     @Query("SELECT * FROM episodes WHERE podcastUrl = :podcastUrl ORDER BY pubDate DESC")
     fun getEpisodesByPodcast(podcastUrl: String): Flow<List<EpisodeWithPodcast>>
 
     @Query("SELECT * FROM podcasts WHERE url = :url")
     suspend fun getPodcast(url: String): PodcastEntity?
+
+    @Query("UPDATE episodes SET localFilePath = :path WHERE guid = :guid")
+    suspend fun updateLocalFile(guid: String, path: String): Int
 }

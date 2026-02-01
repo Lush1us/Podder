@@ -36,7 +36,8 @@ class MainActivity : ComponentActivity() {
 
         val podcastRepository = PodcastRepository(
             database.podcastDao(),
-            database.subscriptionDao()
+            database.subscriptionDao(),
+            applicationContext
         )
 
         // PlayerController (Application Scope)

@@ -25,5 +25,6 @@ data class EpisodeEntity(
     val pubDate: Long,
     val audioUrl: String,
     val duration: Long,
-    val progressInMillis: Long = 0L
+    val progressInMillis: Long = 0L,
+    val localFilePath: String? = null
 )
