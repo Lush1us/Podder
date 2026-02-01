@@ -57,6 +57,13 @@ class PodcastViewModel(
 
     init {
         observePlayerForProgressSaving()
+        cleanupExpiredDownloads()
+    }
+
+    private fun cleanupExpiredDownloads() {
+        viewModelScope.launch {
+            repository.cleanupExpiredDownloads()
+        }
     }
 
     private fun observePlayerForProgressSaving() {
@@ -166,8 +173,8 @@ class PodcastViewModel(
             is PodcastAction.FetchPodcast -> { /* Not used */ }
             is PodcastAction.MarkAsFinished -> {
                 viewModelScope.launch {
-                    // Set progress to duration * 1000 (convert seconds to millis) to mark as finished
-                    repository.saveProgress(action.guid, action.durationSeconds * 1000)
+                    // Set progress to duration * 1000 (convert seconds to millis) and set finishedAt
+                    repository.markAsFinished(action.guid, action.durationSeconds * 1000)
                 }
             }
             is PodcastAction.SeekTo -> {
@@ -197,6 +204,12 @@ class PodcastViewModel(
                             break
                         }
                     }
+                }
+            }
+            is PodcastAction.DeleteDownload -> {
+                Log.d(TAG, "  Delete download: ${action.guid}")
+                viewModelScope.launch {
+                    repository.deleteDownload(action.guid, action.localFilePath)
                 }
             }
         }

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material3.*
@@ -47,14 +48,20 @@ fun HomeScreen(
     val downloadStates by viewModel.downloadStates.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // Selection state
-    var selectedEpisode by remember { mutableStateOf<EpisodeWithPodcast?>(null) }
+    // Selection state - store just the GUID to avoid stale references
+    var selectedGuid by remember { mutableStateOf<String?>(null) }
 
     // Optimistic UI: track episodes being marked as finished (before DB update)
     var pendingFinishedGuids by remember { mutableStateOf(setOf<String>()) }
 
+    // Look up the current episode from the list to get fresh data (including localFilePath)
+    val selectedEpisode = remember(uiState, selectedGuid) {
+        if (selectedGuid == null) null
+        else (uiState as? HomeUiState.Success)?.feed?.find { it.episode.guid == selectedGuid }
+    }
+
     // Get download state for selected episode
-    val selectedDownloadState = selectedEpisode?.let { downloadStates[it.episode.guid] }
+    val selectedDownloadState = selectedGuid?.let { downloadStates[it] }
 
     LaunchedEffect(Unit) {
         // Initialize subscriptions from OPML file
@@ -69,7 +76,7 @@ fun HomeScreen(
                 TopAppBar(
                     title = { Text("1 selected") },
                     navigationIcon = {
-                        IconButton(onClick = { selectedEpisode = null }) {
+                        IconButton(onClick = { selectedGuid = null }) {
                             Icon(Icons.Filled.Close, contentDescription = "Clear selection")
                         }
                     },
@@ -100,8 +107,28 @@ fun HomeScreen(
                                 }
                             }
                             null -> {
-                                // Show download button only if not already downloaded
-                                if (selectedEpisode?.episode?.localFilePath == null) {
+                                val localPath = selectedEpisode?.episode?.localFilePath
+                                if (localPath != null) {
+                                    // Show delete button if already downloaded
+                                    IconButton(
+                                        onClick = {
+                                            selectedEpisode?.let { episode ->
+                                                viewModel.process(
+                                                    PodcastAction.DeleteDownload(
+                                                        guid = episode.episode.guid,
+                                                        localFilePath = localPath,
+                                                        source = "HomeScreen",
+                                                        timestamp = System.currentTimeMillis()
+                                                    )
+                                                )
+                                                selectedGuid = null
+                                            }
+                                        }
+                                    ) {
+                                        Icon(Icons.Filled.Delete, contentDescription = "Delete download")
+                                    }
+                                } else {
+                                    // Show download button if not downloaded
                                     IconButton(
                                         onClick = {
                                             selectedEpisode?.let { episode ->
@@ -138,7 +165,7 @@ fun HomeScreen(
                                             timestamp = System.currentTimeMillis()
                                         )
                                     )
-                                    selectedEpisode = null
+                                    selectedGuid = null
                                 }
                             }
                         ) {
@@ -176,8 +203,8 @@ fun HomeScreen(
                         episodes = state.feed,
                         viewModel = viewModel,
                         selectedEpisode = selectedEpisode,
-                        onEpisodeSelected = { selectedEpisode = it },
-                        onClearSelection = { selectedEpisode = null },
+                        onEpisodeSelected = { selectedGuid = it.episode.guid },
+                        onClearSelection = { selectedGuid = null },
                         pendingFinishedGuids = pendingFinishedGuids
                     )
                 }

@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
-data class EpisodeProgress(val guid: String, val progressInMillis: Long)
+data class EpisodeProgress(val guid: String, val progressInMillis: Long, val finishedAt: Long?)
 data class EpisodeDownload(val guid: String, val localFilePath: String?)
 
 @Dao
@@ -34,7 +34,7 @@ interface PodcastDao {
     @Query("SELECT COUNT(*) FROM episodes")
     suspend fun getEpisodeCount(): Int
 
-    @Query("SELECT guid, progressInMillis FROM episodes")
+    @Query("SELECT guid, progressInMillis, finishedAt FROM episodes")
     suspend fun getAllProgress(): List<EpisodeProgress>
 
     @Query("SELECT guid, localFilePath FROM episodes WHERE localFilePath IS NOT NULL")
@@ -49,4 +49,13 @@ interface PodcastDao {
 
     @Query("UPDATE episodes SET localFilePath = :path WHERE guid = :guid")
     suspend fun updateLocalFile(guid: String, path: String): Int
+
+    @Query("UPDATE episodes SET finishedAt = :finishedAt WHERE guid = :guid")
+    suspend fun updateFinishedAt(guid: String, finishedAt: Long): Int
+
+    @Query("UPDATE episodes SET localFilePath = NULL WHERE guid = :guid")
+    suspend fun clearLocalFile(guid: String): Int
+
+    @Query("SELECT * FROM episodes WHERE localFilePath IS NOT NULL AND finishedAt IS NOT NULL AND finishedAt < :cutoffTime")
+    suspend fun getExpiredDownloads(cutoffTime: Long): List<EpisodeEntity>
 }
