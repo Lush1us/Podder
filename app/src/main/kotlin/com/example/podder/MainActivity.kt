@@ -14,11 +14,16 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.podder.data.PodcastRepository
 import com.example.podder.data.local.PodderDatabase
+import com.example.podder.data.network.PodcastSearchService
 import com.example.podder.player.PlayerController
 import com.example.podder.ui.AppNavigation
 import com.example.podder.ui.screens.PodcastViewModel
 import com.example.podder.ui.theme.PodderTheme
 import com.example.podder.sync.SyncScheduler
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import retrofit2.Retrofit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,10 +39,20 @@ class MainActivity : ComponentActivity() {
             .fallbackToDestructiveMigration()
             .build()
 
+        // iTunes Search API for podcast discovery
+        // Note: iTunes returns text/javascript content type, not application/json
+        val json = Json { ignoreUnknownKeys = true }
+        val searchRetrofit = Retrofit.Builder()
+            .baseUrl("https://itunes.apple.com/")
+            .addConverterFactory(json.asConverterFactory("text/javascript".toMediaType()))
+            .build()
+        val searchService = searchRetrofit.create(PodcastSearchService::class.java)
+
         val podcastRepository = PodcastRepository(
             database.podcastDao(),
             database.subscriptionDao(),
-            applicationContext
+            applicationContext,
+            searchService
         )
 
         // PlayerController (Application Scope)

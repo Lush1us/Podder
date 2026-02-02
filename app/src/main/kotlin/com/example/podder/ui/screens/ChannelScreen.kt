@@ -9,11 +9,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.podder.data.network.SearchResult
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +37,8 @@ fun ChannelScreen(
     onBack: () -> Unit
 ) {
     val episodes by viewModel.getEpisodesByPodcast(podcastUrl).collectAsState(initial = emptyList())
+    val subscribedUrls by viewModel.subscribedUrls.collectAsStateWithLifecycle()
+    val isSubscribed = subscribedUrls.contains(podcastUrl)
     val configuration = LocalConfiguration.current
     val headerHeight = (configuration.screenHeightDp * 0.20).dp
 
@@ -63,25 +68,77 @@ fun ChannelScreen(
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.5f))
                 )
-                // Back button
-                IconButton(
-                    onClick = onBack,
+                // Top row with back button and subscribe button
+                Row(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(8.dp)
-                        .statusBarsPadding()
+                        .statusBarsPadding(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Box(
-                            modifier = Modifier
-                                .size(26.dp)
-                                .background(Color.Gray.copy(alpha = 0.5f), CircleShape)
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
+                    // Back button
+                    IconButton(onClick = onBack) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Box(
+                                modifier = Modifier
+                                    .size(26.dp)
+                                    .background(Color.Gray.copy(alpha = 0.5f), CircleShape)
+                            )
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                    // Subscribe/Unsubscribe button
+                    IconButton(
+                        onClick = {
+                            val podcast = episodes.firstOrNull()?.podcast
+                            if (isSubscribed) {
+                                viewModel.process(
+                                    PodcastAction.Unsubscribe(
+                                        url = podcastUrl,
+                                        source = "ChannelScreen",
+                                        timestamp = System.currentTimeMillis()
+                                    )
+                                )
+                            } else {
+                                viewModel.process(
+                                    PodcastAction.Subscribe(
+                                        podcast = SearchResult(
+                                            collectionId = podcastUrl.hashCode().toLong(),
+                                            collectionName = podcast?.title ?: "",
+                                            artistName = null,
+                                            artworkUrl = podcast?.imageUrl,
+                                            feedUrl = podcastUrl,
+                                            genre = null
+                                        ),
+                                        source = "ChannelScreen",
+                                        timestamp = System.currentTimeMillis()
+                                    )
+                                )
+                            }
+                        }
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Box(
+                                modifier = Modifier
+                                    .size(26.dp)
+                                    .background(
+                                        if (isSubscribed) MaterialTheme.colorScheme.primary
+                                        else Color.Gray.copy(alpha = 0.5f),
+                                        CircleShape
+                                    )
+                            )
+                            Icon(
+                                imageVector = if (isSubscribed) Icons.Filled.Check else Icons.Filled.Add,
+                                contentDescription = if (isSubscribed) "Unsubscribe" else "Subscribe",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
                 // Podcast title

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.podder.core.PodcastAction
 import com.example.podder.data.PodcastRepository
 import com.example.podder.data.local.EpisodeWithPodcast
+import com.example.podder.data.network.SearchResult
 import com.example.podder.player.PlayerController
 import com.example.podder.player.PlayerUiState
 import kotlinx.coroutines.NonCancellable
@@ -43,12 +44,26 @@ class PodcastViewModel(
     private val _downloadStates = MutableStateFlow<Map<String, DownloadState>>(emptyMap())
     val downloadStates: StateFlow<Map<String, DownloadState>> = _downloadStates.asStateFlow()
 
+    private val _searchResults = MutableStateFlow<List<SearchResult>>(emptyList())
+    val searchResults: StateFlow<List<SearchResult>> = _searchResults.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
     val uiState: StateFlow<HomeUiState> = repository.homeFeed
         .map { HomeUiState.Success(it) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = HomeUiState.Loading
+        )
+
+    val subscribedUrls: StateFlow<Set<String>> = repository.subscribedUrls
+        .map { it.toSet() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptySet()
         )
 
     val playerUiState: StateFlow<PlayerUiState> = playerController.playerUiState
@@ -211,6 +226,41 @@ class PodcastViewModel(
                 viewModelScope.launch {
                     repository.deleteDownload(action.guid, action.localFilePath)
                 }
+            }
+            is PodcastAction.Search -> {
+                Log.d(TAG, "  Search: ${action.query}")
+                viewModelScope.launch {
+                    _isSearching.value = true
+                    try {
+                        _searchResults.value = repository.searchPodcasts(action.query)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Search failed: ${e.message}", e)
+                        _searchResults.value = emptyList()
+                    } finally {
+                        _isSearching.value = false
+                    }
+                }
+            }
+            is PodcastAction.Subscribe -> {
+                Log.d(TAG, "  Subscribe: ${action.podcast.collectionName}")
+                viewModelScope.launch {
+                    action.podcast.feedUrl?.let { feedUrl ->
+                        repository.subscribe(feedUrl)
+                        // Refresh feed after subscribing
+                        repository.updatePodcasts()
+                    }
+                }
+            }
+            is PodcastAction.Unsubscribe -> {
+                Log.d(TAG, "  Unsubscribe: ${action.url}")
+                viewModelScope.launch {
+                    repository.unsubscribe(action.url)
+                }
+            }
+            is PodcastAction.ClearSearch -> {
+                Log.d(TAG, "  Clear search")
+                _searchResults.value = emptyList()
+                _isSearching.value = false
             }
         }
     }

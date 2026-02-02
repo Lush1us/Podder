@@ -11,12 +11,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.DownloadDone
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,8 +36,12 @@ import coil.compose.AsyncImage
 import com.example.podder.R
 import com.example.podder.core.PodcastAction
 import com.example.podder.data.local.EpisodeWithPodcast
+import com.example.podder.data.network.SearchResult
+import com.example.podder.ui.Channel
 import com.example.podder.ui.Episode
 import com.example.podder.ui.components.PlayerControls
+import com.example.podder.ui.components.PodcastSearchBar
+import androidx.compose.foundation.clickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +52,14 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val playerState by viewModel.playerUiState.collectAsStateWithLifecycle()
     val downloadStates by viewModel.downloadStates.collectAsStateWithLifecycle()
+    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
+    val subscribedUrls by viewModel.subscribedUrls.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // Search mode state
+    var isSearchMode by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
 
     // Selection state - store just the GUID to avoid stale references
     var selectedGuid by remember { mutableStateOf<String?>(null) }
@@ -176,37 +189,125 @@ fun HomeScreen(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 )
+            } else if (isSearchMode) {
+                // Search toolbar
+                TopAppBar(
+                    title = {
+                        PodcastSearchBar(
+                            query = searchQuery,
+                            onQueryChange = { searchQuery = it },
+                            onSearch = { query ->
+                                viewModel.process(
+                                    PodcastAction.Search(
+                                        query = query,
+                                        source = "HomeScreen",
+                                        timestamp = System.currentTimeMillis()
+                                    )
+                                )
+                            },
+                            onClose = {
+                                isSearchMode = false
+                                searchQuery = ""
+                                viewModel.process(
+                                    PodcastAction.ClearSearch(
+                                        source = "HomeScreen",
+                                        timestamp = System.currentTimeMillis()
+                                    )
+                                )
+                            }
+                        )
+                    }
+                )
             } else {
-                TopAppBar(title = { Text("Podder") })
+                // Normal toolbar
+                TopAppBar(
+                    title = { Text("Podder") },
+                    actions = {
+                        IconButton(onClick = { isSearchMode = true }) {
+                            Icon(Icons.Filled.Search, contentDescription = "Search")
+                        }
+                    }
+                )
             }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            when (val state = uiState) {
-                is HomeUiState.Loading -> {
+            // Show search results when in search mode, otherwise show feed
+            if (isSearchMode) {
+                if (isSearching) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
-                }
-                is HomeUiState.Error -> {
+                } else if (searchResults.isNotEmpty()) {
+                    SearchResultsList(
+                        results = searchResults,
+                        subscribedUrls = subscribedUrls,
+                        onSubscribe = { result ->
+                            viewModel.process(
+                                PodcastAction.Subscribe(
+                                    podcast = result,
+                                    source = "HomeScreen",
+                                    timestamp = System.currentTimeMillis()
+                                )
+                            )
+                        },
+                        onUnsubscribe = { feedUrl ->
+                            viewModel.process(
+                                PodcastAction.Unsubscribe(
+                                    url = feedUrl,
+                                    source = "HomeScreen",
+                                    timestamp = System.currentTimeMillis()
+                                )
+                            )
+                        },
+                        onNavigateToChannel = { feedUrl ->
+                            isSearchMode = false
+                            searchQuery = ""
+                            viewModel.process(
+                                PodcastAction.ClearSearch(
+                                    source = "HomeScreen",
+                                    timestamp = System.currentTimeMillis()
+                                )
+                            )
+                            navController.navigate(Channel(feedUrl))
+                        }
+                    )
+                } else if (searchQuery.isNotEmpty()) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error,
+                            text = "No results found",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
                 }
-                is HomeUiState.Success -> {
-                    EpisodeList(
-                        episodes = state.feed,
-                        viewModel = viewModel,
-                        selectedEpisode = selectedEpisode,
-                        onEpisodeSelected = { selectedGuid = it.episode.guid },
-                        onClearSelection = { selectedGuid = null },
-                        pendingFinishedGuids = pendingFinishedGuids
-                    )
+            } else {
+                when (val state = uiState) {
+                    is HomeUiState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                    }
+                    is HomeUiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                text = state.message,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    }
+                    is HomeUiState.Success -> {
+                        EpisodeList(
+                            episodes = state.feed,
+                            viewModel = viewModel,
+                            selectedEpisode = selectedEpisode,
+                            onEpisodeSelected = { selectedGuid = it.episode.guid },
+                            onClearSelection = { selectedGuid = null },
+                            pendingFinishedGuids = pendingFinishedGuids
+                        )
+                    }
                 }
             }
 
@@ -504,5 +605,98 @@ private fun formatDurationWithProgress(durationSeconds: Long, progressMillis: Lo
         "${elapsedMinutes}/${totalMinutes}m"
     } else {
         "${totalMinutes}m"
+    }
+}
+
+@Composable
+private fun SearchResultsList(
+    results: List<SearchResult>,
+    subscribedUrls: Set<String>,
+    onSubscribe: (SearchResult) -> Unit,
+    onUnsubscribe: (String) -> Unit,
+    onNavigateToChannel: (String) -> Unit
+) {
+    LazyColumn {
+        items(results, key = { it.collectionId }) { result ->
+            val isSubscribed = result.feedUrl?.let { subscribedUrls.contains(it) } ?: false
+            SearchResultRow(
+                result = result,
+                isSubscribed = isSubscribed,
+                onToggleSubscription = {
+                    if (isSubscribed) {
+                        result.feedUrl?.let { onUnsubscribe(it) }
+                    } else {
+                        onSubscribe(result)
+                    }
+                },
+                onNavigateToChannel = {
+                    result.feedUrl?.let { onNavigateToChannel(it) }
+                }
+            )
+            HorizontalDivider()
+        }
+    }
+}
+
+@Composable
+private fun SearchResultRow(
+    result: SearchResult,
+    isSubscribed: Boolean,
+    onToggleSubscription: () -> Unit,
+    onNavigateToChannel: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onNavigateToChannel() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            model = result.artworkUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color.Gray)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = result.collectionName,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            result.artistName?.let { artist ->
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = artist,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            result.genre?.let { genre ->
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = genre,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        if (result.feedUrl != null) {
+            IconButton(onClick = onToggleSubscription) {
+                Icon(
+                    imageVector = if (isSubscribed) Icons.Filled.Check else Icons.Filled.Add,
+                    contentDescription = if (isSubscribed) "Unsubscribe" else "Subscribe",
+                    tint = if (isSubscribed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }

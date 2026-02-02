@@ -9,10 +9,14 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.podder.data.local.PodcastDao
 import com.example.podder.data.local.SubscriptionDao
+import com.example.podder.data.local.SubscriptionEntity
 import com.example.podder.data.local.PodcastEntity
 import com.example.podder.data.local.EpisodeEntity
 import com.example.podder.data.local.EpisodeWithPodcast
+import com.example.podder.data.network.PodcastSearchService
+import com.example.podder.data.network.SearchResult
 import com.example.podder.parser.MyXmlParser
+import com.example.podder.parser.Podcast
 import com.example.podder.parser.OpmlParser
 import com.example.podder.sync.DownloadEpisodeWorker
 import com.example.podder.utils.DateUtils
@@ -33,20 +37,26 @@ interface PodcastService {
 class PodcastRepository(
     private val podcastDao: PodcastDao,
     private val subscriptionDao: SubscriptionDao,
-    private val context: Context? = null
+    private val context: Context? = null,
+    private val searchService: PodcastSearchService? = null,
+    feedService: PodcastService? = null
 ) {
     private val service: PodcastService
     private val xmlParser = MyXmlParser()
 
     init {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://example.com/") // Base URL is ignored for full URL requests
-            .addConverterFactory(ScalarsConverterFactory.create())
-            .build()
-        service = retrofit.create(PodcastService::class.java)
+        service = feedService ?: run {
+            val retrofit = Retrofit.Builder()
+                .baseUrl("https://example.com/") // Base URL is ignored for full URL requests
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build()
+            retrofit.create(PodcastService::class.java)
+        }
     }
 
     val homeFeed: Flow<List<EpisodeWithPodcast>> = podcastDao.getAllEpisodes()
+
+    val subscribedUrls: Flow<List<String>> = subscriptionDao.getSubscribedUrls()
 
     suspend fun importOpml(inputStream: InputStream) = withContext(Dispatchers.IO) {
         val subscriptions = OpmlParser.parse(inputStream)
@@ -193,5 +203,40 @@ class PodcastRepository(
             ExistingWorkPolicy.KEEP,
             downloadRequest
         )
+    }
+
+    /**
+     * Search for podcasts by query term using iTunes Search API.
+     * @param query The search term
+     * @return List of SearchResult objects from the API
+     */
+    suspend fun searchPodcasts(query: String): List<SearchResult> = withContext(Dispatchers.IO) {
+        val service = searchService ?: return@withContext emptyList()
+        val term = query.trim()
+        if (term.isEmpty()) return@withContext emptyList()
+
+        val response = service.search(term)
+        response.results
+    }
+
+    /**
+     * Subscribe to a podcast by its feed URL.
+     * @param feedUrl The RSS feed URL of the podcast
+     */
+    suspend fun subscribe(feedUrl: String) = withContext(Dispatchers.IO) {
+        val subscription = SubscriptionEntity(
+            url = feedUrl,
+            title = null,
+            dateAdded = System.currentTimeMillis()
+        )
+        subscriptionDao.insert(subscription)
+    }
+
+    /**
+     * Unsubscribe from a podcast by its feed URL.
+     * @param feedUrl The RSS feed URL of the podcast
+     */
+    suspend fun unsubscribe(feedUrl: String) = withContext(Dispatchers.IO) {
+        subscriptionDao.delete(feedUrl)
     }
 }
