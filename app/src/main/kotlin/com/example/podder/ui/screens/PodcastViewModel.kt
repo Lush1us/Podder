@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.podder.core.PodcastAction
 import com.example.podder.data.PodcastRepository
 import com.example.podder.data.local.EpisodeWithPodcast
+import com.example.podder.data.local.PodcastEntity
 import com.example.podder.data.network.SearchResult
 import com.example.podder.player.PlayerController
 import com.example.podder.player.PlayerUiState
@@ -64,6 +65,13 @@ class PodcastViewModel(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptySet()
+        )
+
+    val subscribedPodcasts: StateFlow<List<PodcastEntity>> = repository.subscribedPodcasts
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
         )
 
     val playerUiState: StateFlow<PlayerUiState> = playerController.playerUiState

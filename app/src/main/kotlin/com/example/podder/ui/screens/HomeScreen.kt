@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.DownloadDone
+import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -39,6 +40,7 @@ import com.example.podder.data.local.EpisodeWithPodcast
 import com.example.podder.data.network.SearchResult
 import com.example.podder.ui.Channel
 import com.example.podder.ui.Episode
+import com.example.podder.ui.Subscriptions
 import com.example.podder.ui.components.PlayerControls
 import com.example.podder.ui.components.PodcastSearchBar
 import androidx.compose.foundation.clickable
@@ -223,6 +225,9 @@ fun HomeScreen(
                 TopAppBar(
                     title = { Text("Podder") },
                     actions = {
+                        IconButton(onClick = { navController.navigate(Subscriptions) }) {
+                            Icon(Icons.Filled.Subscriptions, contentDescription = "Subscriptions")
+                        }
                         IconButton(onClick = { isSearchMode = true }) {
                             Icon(Icons.Filled.Search, contentDescription = "Search")
                         }
@@ -305,6 +310,7 @@ fun HomeScreen(
                             selectedEpisode = selectedEpisode,
                             onEpisodeSelected = { selectedGuid = it.episode.guid },
                             onClearSelection = { selectedGuid = null },
+                            onChannelClick = { podcastUrl -> navController.navigate(Channel(podcastUrl)) },
                             pendingFinishedGuids = pendingFinishedGuids
                         )
                     }
@@ -360,6 +366,7 @@ fun EpisodeList(
     selectedEpisode: EpisodeWithPodcast?,
     onEpisodeSelected: (EpisodeWithPodcast) -> Unit,
     onClearSelection: () -> Unit,
+    onChannelClick: (String) -> Unit,
     pendingFinishedGuids: Set<String> = emptySet()
 ) {
     LazyColumn {
@@ -376,7 +383,8 @@ fun EpisodeList(
                     viewModel = viewModel,
                     isSelected = isSelected,
                     onLongPress = { onEpisodeSelected(item) },
-                    onClearSelection = onClearSelection
+                    onClearSelection = onClearSelection,
+                    onChannelClick = onChannelClick
                 )
             } else {
                 RegularEpisodeRow(
@@ -384,7 +392,8 @@ fun EpisodeList(
                     viewModel = viewModel,
                     isSelected = isSelected,
                     onLongPress = { onEpisodeSelected(item) },
-                    onClearSelection = onClearSelection
+                    onClearSelection = onClearSelection,
+                    onChannelClick = onChannelClick
                 )
             }
             HorizontalDivider()
@@ -399,7 +408,8 @@ private fun FinishedEpisodeRow(
     viewModel: PodcastViewModel,
     isSelected: Boolean,
     onLongPress: () -> Unit,
-    onClearSelection: () -> Unit
+    onClearSelection: () -> Unit,
+    onChannelClick: (String) -> Unit
 ) {
     val grayColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
     val backgroundColor = if (isSelected) {
@@ -438,12 +448,13 @@ private fun FinishedEpisodeRow(
     ) {
         AsyncImage(
             model = item.podcast.imageUrl,
-            contentDescription = null,
+            contentDescription = "Go to channel",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(28.dp)
                 .clip(RoundedCornerShape(2.dp))
                 .background(Color.Gray)
+                .clickable { onChannelClick(item.podcast.url) }
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
@@ -480,7 +491,8 @@ private fun RegularEpisodeRow(
     viewModel: PodcastViewModel,
     isSelected: Boolean,
     onLongPress: () -> Unit,
-    onClearSelection: () -> Unit
+    onClearSelection: () -> Unit,
+    onChannelClick: (String) -> Unit
 ) {
     val backgroundColor = if (isSelected) {
         MaterialTheme.colorScheme.surfaceVariant
@@ -518,12 +530,13 @@ private fun RegularEpisodeRow(
     ) {
         AsyncImage(
             model = item.podcast.imageUrl,
-            contentDescription = null,
+            contentDescription = "Go to channel",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(56.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .background(Color.Gray)
+                .clickable { onChannelClick(item.podcast.url) }
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {

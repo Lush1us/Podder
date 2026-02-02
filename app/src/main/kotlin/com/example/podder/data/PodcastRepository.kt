@@ -58,6 +58,8 @@ class PodcastRepository(
 
     val subscribedUrls: Flow<List<String>> = subscriptionDao.getSubscribedUrls()
 
+    val subscribedPodcasts: Flow<List<PodcastEntity>> = podcastDao.getSubscribedPodcasts()
+
     suspend fun importOpml(inputStream: InputStream) = withContext(Dispatchers.IO) {
         val subscriptions = OpmlParser.parse(inputStream)
         subscriptionDao.insertAll(subscriptions)

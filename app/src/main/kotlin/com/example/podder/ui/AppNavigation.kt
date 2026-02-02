@@ -13,6 +13,7 @@ import com.example.podder.ui.screens.EpisodeScreen
 import com.example.podder.ui.screens.HomeScreen
 import com.example.podder.ui.screens.PodcastDetailScreen
 import com.example.podder.ui.screens.PodcastViewModel
+import com.example.podder.ui.screens.SubscriptionsScreen
 import java.net.URLDecoder
 import java.net.URLEncoder
 import kotlinx.serialization.Serializable
@@ -22,6 +23,9 @@ object Home
 
 @Serializable
 object Episode
+
+@Serializable
+object Subscriptions
 
 @Serializable
 data class PodcastDetails(val title: String)
@@ -50,6 +54,9 @@ fun AppNavigation(viewModel: PodcastViewModel) {
                 onSeekForward = {
                     viewModel.process(PodcastAction.SeekForward("EpisodeScreen", System.currentTimeMillis()))
                 },
+                onSeekTo = { positionMillis ->
+                    viewModel.process(PodcastAction.SeekTo(positionMillis, "EpisodeScreen", System.currentTimeMillis()))
+                },
                 onChannelClick = { podcastUrl ->
                     navController.navigate(Channel(podcastUrl))
                 }
@@ -61,6 +68,15 @@ fun AppNavigation(viewModel: PodcastViewModel) {
                 podcastUrl = channel.podcastUrl,
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable<Subscriptions> {
+            SubscriptionsScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onPodcastClick = { podcastUrl ->
+                    navController.navigate(Channel(podcastUrl))
+                }
             )
         }
         /*

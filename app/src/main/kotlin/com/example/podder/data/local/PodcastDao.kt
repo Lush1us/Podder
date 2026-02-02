@@ -58,4 +58,7 @@ interface PodcastDao {
 
     @Query("SELECT * FROM episodes WHERE localFilePath IS NOT NULL AND finishedAt IS NOT NULL AND finishedAt < :cutoffTime")
     suspend fun getExpiredDownloads(cutoffTime: Long): List<EpisodeEntity>
+
+    @Query("SELECT p.* FROM podcasts p INNER JOIN subscriptions s ON p.url = s.url ORDER BY p.title")
+    fun getSubscribedPodcasts(): Flow<List<PodcastEntity>>
 }
