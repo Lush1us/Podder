@@ -16,7 +16,11 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +44,7 @@ fun EpisodeScreen(
     onPlayPause: () -> Unit,
     onSeekBack: () -> Unit,
     onSeekForward: () -> Unit,
+    onSeekTo: (Long) -> Unit,
     onChannelClick: (String) -> Unit
 ) {
     Column(
@@ -82,19 +87,45 @@ fun EpisodeScreen(
 
         // Progress bar, time display, and controls
         val isLoading = playerState.durationMillis <= 0
+
+        // Local state for real-time slider tracking
+        var isDragging by remember { mutableStateOf(false) }
+        var dragProgress by remember { mutableFloatStateOf(0f) }
+
+        // Use drag progress while dragging, otherwise use player state
+        val displayProgress = if (isDragging) dragProgress else playerState.progress
+        val displayPositionMillis = if (isDragging) {
+            (dragProgress * playerState.durationMillis).toLong()
+        } else {
+            playerState.currentPositionMillis
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LinearProgressIndicator(
-                progress = { if (isLoading) 0.5f else playerState.progress },
+            Slider(
+                value = if (isLoading) 0.5f else displayProgress,
+                onValueChange = { newProgress ->
+                    if (!isLoading) {
+                        isDragging = true
+                        dragProgress = newProgress
+                    }
+                },
+                onValueChangeFinished = {
+                    if (!isLoading) {
+                        val newPositionMillis = (dragProgress * playerState.durationMillis).toLong()
+                        onSeekTo(newPositionMillis)
+                        isDragging = false
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(0.9f),
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                enabled = !isLoading
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(0.dp))
             Text(
-                text = if (isLoading) "--:--:-- / --:--:--" else "${formatTime(playerState.currentPositionMillis)} / ${formatTime(playerState.durationMillis)}",
+                text = if (isLoading) "--:--:-- / --:--:--" else "${formatTime(displayPositionMillis)} / ${formatTime(playerState.durationMillis)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

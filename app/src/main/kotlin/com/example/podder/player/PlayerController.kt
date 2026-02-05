@@ -168,6 +168,55 @@ class PlayerController(private val context: Context) {
         }
     }
 
+    /**
+     * Restore the player state without auto-playing.
+     * Used on app launch to show the Mini Player with the last played episode.
+     */
+    suspend fun restore(
+        guid: String,
+        url: String,
+        title: String,
+        artist: String,
+        imageUrl: String?,
+        description: String?,
+        podcastUrl: String?,
+        startPosition: Long = 0L
+    ) = withContext(Dispatchers.Main) {
+        try {
+            val mediaController = ensureController()
+
+            // Set current episode state atomically
+            _playerUiState.value = _playerUiState.value.copy(
+                currentEpisodeGuid = guid,
+                podcastUrl = podcastUrl,
+                currentPositionMillis = startPosition,
+                durationMillis = 0L,
+                progress = 0f,
+                isPlaying = false
+            )
+
+            // Build Metadata for Notification
+            val metadata = MediaMetadata.Builder()
+                .setTitle(title)
+                .setArtist(artist)
+                .setArtworkUri(imageUrl?.let { Uri.parse(it) })
+                .setDescription(description)
+                .build()
+
+            val mediaItem = MediaItem.Builder()
+                .setUri(url)
+                .setMediaMetadata(metadata)
+                .build()
+
+            mediaController.setMediaItem(mediaItem, startPosition)
+            mediaController.prepare()
+            // Do NOT call play() - leave paused so Mini Player shows but audio doesn't start
+            Log.d("PlayerController", "Restored: $title by $artist at ${startPosition}ms (paused)")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun startProgressUpdates() {
         progressJob?.cancel()
         progressJob = scope.launch {

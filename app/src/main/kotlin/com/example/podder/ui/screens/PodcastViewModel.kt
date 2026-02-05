@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.podder.core.PodcastAction
+import com.example.podder.data.PlaybackStore
 import com.example.podder.data.PodcastRepository
 import com.example.podder.data.local.EpisodeWithPodcast
 import com.example.podder.data.local.PodcastEntity
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,7 +38,8 @@ sealed interface HomeUiState {
 
 class PodcastViewModel(
     private val repository: PodcastRepository,
-    private val playerController: PlayerController
+    private val playerController: PlayerController,
+    private val playbackStore: PlaybackStore
 ) : ViewModel() {
 
     private var lastSavedPosition: Long = 0L
@@ -81,11 +84,68 @@ class PodcastViewModel(
     init {
         observePlayerForProgressSaving()
         cleanupExpiredDownloads()
+        restoreLastPlayed()
     }
 
     private fun cleanupExpiredDownloads() {
         viewModelScope.launch {
             repository.cleanupExpiredDownloads()
+        }
+    }
+
+    private fun restoreLastPlayed() {
+        Log.d(TAG, "restoreLastPlayed() called")
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Reading from PlaybackStore...")
+                val lastPlayed = playbackStore.lastPlayed.first()
+                Log.d(TAG, "PlaybackStore returned: $lastPlayed")
+
+                if (lastPlayed == null) {
+                    Log.d(TAG, "No last played found in DataStore")
+                    return@launch
+                }
+                val (guid, _) = lastPlayed
+
+                Log.d(TAG, "Looking up episode with guid: $guid")
+                val episode = repository.getEpisode(guid)
+                if (episode == null) {
+                    Log.d(TAG, "Episode not found in database for guid: $guid")
+                    return@launch
+                }
+
+                Log.d(TAG, "Looking up podcast with url: ${episode.podcastUrl}")
+                val podcast = repository.getPodcast(episode.podcastUrl)
+                if (podcast == null) {
+                    Log.d(TAG, "Podcast not found in database for url: ${episode.podcastUrl}")
+                    return@launch
+                }
+
+                // Check for local file - use it if exists
+                val localPath = episode.localFilePath
+                val playUrl = if (localPath != null && File(localPath).exists()) {
+                    Log.d(TAG, "Restoring from local file: $localPath")
+                    "file://$localPath"
+                } else {
+                    Log.d(TAG, "Restoring from network: ${episode.audioUrl}")
+                    episode.audioUrl
+                }
+
+                Log.d(TAG, "Restoring last played: ${episode.title} at ${episode.progressInMillis}ms")
+                playerController.restore(
+                    guid = episode.guid,
+                    url = playUrl,
+                    title = episode.title,
+                    artist = podcast.title,
+                    imageUrl = podcast.imageUrl,
+                    description = episode.description,
+                    podcastUrl = episode.podcastUrl,
+                    startPosition = episode.progressInMillis
+                )
+                Log.d(TAG, "Restore complete")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to restore last played: ${e.message}", e)
+            }
         }
     }
 
@@ -96,11 +156,15 @@ class PodcastViewModel(
                 val position = state.currentPositionMillis
                 val duration = state.durationMillis
 
-                // If GUID changed, reset tracking - don't save stale position from old episode
+                // If GUID changed, reset tracking and save to PlaybackStore
                 if (guid != lastSavedGuid) {
                     Log.d(TAG, "Episode changed to: $guid, resetting progress tracking")
                     lastSavedGuid = guid
                     lastSavedPosition = position
+                    // Save last played episode to DataStore
+                    launch(NonCancellable) {
+                        playbackStore.saveLastPlayed(guid, state.podcastUrl)
+                    }
                     return@collect
                 }
 
@@ -149,6 +213,9 @@ class PodcastViewModel(
                     // Reset progress tracking for new episode
                     lastSavedGuid = action.guid
                     lastSavedPosition = startPosition
+
+                    // Save last played to DataStore for session restoration
+                    playbackStore.saveLastPlayed(action.guid, action.podcastUrl)
 
                     // Check for local file - use it if exists
                     val localPath = episode?.localFilePath
