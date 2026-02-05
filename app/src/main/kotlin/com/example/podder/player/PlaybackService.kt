@@ -1,5 +1,7 @@
 package com.example.podder.player
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Bundle
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -78,7 +80,18 @@ class PlaybackService : MediaLibraryService() {
             }
         }
 
+        // PendingIntent to open MainActivity when notification is tapped
+        val sessionActivityPendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this, com.example.podder.MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         mediaLibrarySession = MediaLibrarySession.Builder(this, player!!, callback)
+            .setSessionActivity(sessionActivityPendingIntent)
             .setCustomLayout(ImmutableList.of(seekBackButton, seekForwardButton))
             .build()
 
