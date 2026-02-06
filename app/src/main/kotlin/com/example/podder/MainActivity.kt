@@ -13,10 +13,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.podder.ui.AppNavigation
 import com.example.podder.ui.screens.PodcastViewModel
 import com.example.podder.ui.theme.PodderTheme
+import com.example.podder.utils.AppLogger
+import com.example.podder.utils.Originator
 
 class MainActivity : ComponentActivity() {
+
+    private var isFreshLaunch = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Track if this is a fresh launch (not a config change)
+        isFreshLaunch = savedInstanceState == null
 
         // Get singletons from Application scope
         val app = application as PodderApplication
@@ -26,6 +34,7 @@ class MainActivity : ComponentActivity() {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return PodcastViewModel(
+                    app,
                     app.podcastRepository,
                     app.playerController,
                     app.playbackStore
@@ -45,5 +54,29 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (isFreshLaunch) {
+            AppLogger.log(application, Originator.DEVICE, "Lifecycle", "App Launched")
+            isFreshLaunch = false
+        } else {
+            AppLogger.log(application, Originator.DEVICE, "Lifecycle", "App Resumed")
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (!isFinishing) {
+            AppLogger.log(application, Originator.DEVICE, "Lifecycle", "App Backgrounded")
+        }
+    }
+
+    override fun onDestroy() {
+        if (isFinishing) {
+            AppLogger.log(application, Originator.USER, "Lifecycle", "App Closed")
+        }
+        super.onDestroy()
     }
 }

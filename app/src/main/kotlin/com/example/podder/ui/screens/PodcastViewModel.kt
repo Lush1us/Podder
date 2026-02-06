@@ -1,5 +1,6 @@
 package com.example.podder.ui.screens
 
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,8 @@ import com.example.podder.data.local.PodcastEntity
 import com.example.podder.data.network.SearchResult
 import com.example.podder.player.PlayerController
 import com.example.podder.player.PlayerUiState
+import com.example.podder.utils.AppLogger
+import com.example.podder.utils.Originator
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +40,7 @@ sealed interface HomeUiState {
 }
 
 class PodcastViewModel(
+    private val application: Application,
     private val repository: PodcastRepository,
     private val playerController: PlayerController,
     private val playbackStore: PlaybackStore
@@ -90,6 +94,12 @@ class PodcastViewModel(
     private fun cleanupExpiredDownloads() {
         viewModelScope.launch {
             repository.cleanupExpiredDownloads()
+            AppLogger.log(
+                application,
+                Originator.APP,
+                "Cleanup",
+                "Downloads Cleaned"
+            )
         }
     }
 
@@ -142,6 +152,13 @@ class PodcastViewModel(
                     podcastUrl = episode.podcastUrl,
                     startPosition = episode.progressInMillis
                 )
+                AppLogger.log(
+                    application,
+                    Originator.APP,
+                    "SessionRestore",
+                    "Session Restored",
+                    "Title: ${episode.title}, Position: ${episode.progressInMillis}ms"
+                )
                 Log.d(TAG, "Restore complete")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to restore last played: ${e.message}", e)
@@ -180,6 +197,13 @@ class PodcastViewModel(
                     // Use NonCancellable to ensure DB write survives app death
                     launch(NonCancellable) {
                         repository.saveProgress(guid, position)
+                        AppLogger.log(
+                            application,
+                            Originator.APP,
+                            "ProgressSaver",
+                            "Progress Saved",
+                            "GUID: $guid, Position: ${position}ms"
+                        )
                     }
                     lastSavedPosition = position
                 }
@@ -198,6 +222,14 @@ class PodcastViewModel(
 
     fun process(action: PodcastAction) {
         Log.d(TAG, "Action: ${action::class.simpleName} from ${action.source}")
+
+        // Centralized entry log for all actions
+        AppLogger.log(
+            application,
+            Originator.USER,
+            action.javaClass.simpleName,
+            "Processing"
+        )
 
         when (action) {
             is PodcastAction.FetchPodcasts -> {
@@ -238,11 +270,27 @@ class PodcastViewModel(
                         podcastUrl = action.podcastUrl,
                         startPosition = startPosition
                     )
+
+                    AppLogger.log(
+                        application,
+                        Originator.USER,
+                        "Play",
+                        "Playback Started",
+                        "Title: ${action.title}, GUID: ${action.guid}, Position: ${startPosition}ms"
+                    )
                 }
             }
             is PodcastAction.TogglePlayPause -> {
+                val wasPlaying = playerController.playerUiState.value.isPlaying
                 viewModelScope.launch {
                     playerController.togglePlayPause()
+                    AppLogger.log(
+                        application,
+                        Originator.USER,
+                        "TogglePlayPause",
+                        "Toggled Player",
+                        "State: ${if (wasPlaying) "Paused" else "Playing"}"
+                    )
                 }
             }
             is PodcastAction.Pause -> {
@@ -279,6 +327,14 @@ class PodcastViewModel(
 
                 // Start download and observe completion
                 repository.downloadEpisode(action.guid, action.url, action.title)
+
+                AppLogger.log(
+                    application,
+                    Originator.USER,
+                    "Download",
+                    "Work Enqueued",
+                    "GUID: ${action.guid}, Title: ${action.title}"
+                )
 
                 // Poll for completion (check if localFilePath is set)
                 viewModelScope.launch {
@@ -323,6 +379,14 @@ class PodcastViewModel(
                         repository.subscribe(feedUrl)
                         // Refresh feed after subscribing
                         repository.updatePodcasts()
+
+                        AppLogger.log(
+                            application,
+                            Originator.USER,
+                            "Subscribe",
+                            "Subscribed",
+                            "Podcast: ${action.podcast.collectionName}, URL: $feedUrl"
+                        )
                     }
                 }
             }
@@ -330,6 +394,14 @@ class PodcastViewModel(
                 Log.d(TAG, "  Unsubscribe: ${action.url}")
                 viewModelScope.launch {
                     repository.unsubscribe(action.url)
+
+                    AppLogger.log(
+                        application,
+                        Originator.USER,
+                        "Unsubscribe",
+                        "Unsubscribed",
+                        "URL: ${action.url}"
+                    )
                 }
             }
             is PodcastAction.ClearSearch -> {

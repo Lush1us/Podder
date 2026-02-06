@@ -9,6 +9,8 @@ import com.example.podder.data.local.PodderDatabase
 import com.example.podder.data.network.PodcastSearchService
 import com.example.podder.player.PlayerController
 import com.example.podder.sync.SyncScheduler
+import com.example.podder.utils.AppLogger
+import com.example.podder.utils.Originator
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -30,6 +32,9 @@ class PodderApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Set up crash handler before anything else
+        setupCrashHandler()
 
         // Database (Application Scope - singleton)
         database = Room.databaseBuilder(
@@ -67,5 +72,25 @@ class PodderApplication : Application() {
         // Schedule background sync
         SyncScheduler.schedulePeriodicSync(applicationContext)
         SyncScheduler.syncIfStale(applicationContext)
+    }
+
+    private fun setupCrashHandler() {
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            // Log the crash synchronously (blocking) since we're about to die
+            try {
+                val logFile = java.io.File(filesDir, "podder_events.log")
+                val timestamp = java.text.SimpleDateFormat("MM/dd HH:mm:ss.SSS", java.util.Locale.US)
+                    .format(java.util.Date())
+                val crashLog = "$timestamp [DEVICE][   Lifecycle    ][    App Crashed     ] ${throwable.javaClass.simpleName}: ${throwable.message}\n"
+                logFile.appendText(crashLog)
+            } catch (_: Exception) {
+                // Can't log, just proceed to default handler
+            }
+
+            // Pass to default handler to show crash dialog / terminate
+            defaultHandler?.uncaughtException(thread, throwable)
+        }
     }
 }
