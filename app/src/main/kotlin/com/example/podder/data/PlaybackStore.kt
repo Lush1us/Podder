@@ -4,7 +4,9 @@ import android.content.Context
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -12,32 +14,38 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "playback_state")
 
+data class SessionState(
+    val guid: String,
+    val position: Long,
+    val isPlaying: Boolean
+)
+
 class PlaybackStore(private val context: Context) {
 
     companion object {
         private const val TAG = "PlaybackStore"
         private val LAST_PLAYED_GUID = stringPreferencesKey("last_played_guid")
-        private val LAST_PLAYED_URL = stringPreferencesKey("last_played_url")
+        private val LAST_POSITION = longPreferencesKey("last_position")
+        private val IS_PLAYING = booleanPreferencesKey("is_playing")
     }
 
-    suspend fun saveLastPlayed(guid: String, audioUrl: String?) {
-        Log.d(TAG, "Saving last played: guid=$guid, url=$audioUrl")
+    suspend fun saveState(guid: String, position: Long, isPlaying: Boolean) {
+        Log.d(TAG, "Saving state: guid=$guid, position=${position}ms, isPlaying=$isPlaying")
         context.dataStore.edit { prefs ->
             prefs[LAST_PLAYED_GUID] = guid
-            if (audioUrl != null) {
-                prefs[LAST_PLAYED_URL] = audioUrl
-            } else {
-                prefs.remove(LAST_PLAYED_URL)
-            }
+            prefs[LAST_POSITION] = position
+            prefs[IS_PLAYING] = isPlaying
         }
-        Log.d(TAG, "Saved successfully")
     }
 
-    val lastPlayed: Flow<Pair<String, String?>?> = context.dataStore.data.map { prefs ->
+    fun getSessionState(): Flow<SessionState?> = context.dataStore.data.map { prefs ->
         val guid = prefs[LAST_PLAYED_GUID]
-        Log.d(TAG, "Reading last played: guid=$guid")
         if (guid != null) {
-            Pair(guid, prefs[LAST_PLAYED_URL])
+            SessionState(
+                guid = guid,
+                position = prefs[LAST_POSITION] ?: 0L,
+                isPlaying = prefs[IS_PLAYING] ?: false
+            )
         } else {
             null
         }

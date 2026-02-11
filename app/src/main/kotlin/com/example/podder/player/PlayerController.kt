@@ -9,9 +9,11 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.example.podder.data.PlaybackStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,10 +36,14 @@ data class PlayerUiState(
     val podcastUrl: String? = null
 )
 
-class PlayerController(private val context: Context) {
+class PlayerController(
+    private val context: Context,
+    private val playbackStore: PlaybackStore
+) {
     private var controller: MediaController? = null
     private val scope = CoroutineScope(Dispatchers.Main + Job())
     private var progressJob: Job? = null
+    private var lastHeartbeatPosition: Long = 0L
 
     private val _playerUiState = MutableStateFlow(PlayerUiState())
     val playerUiState: StateFlow<PlayerUiState> = _playerUiState.asStateFlow()
@@ -49,7 +55,13 @@ class PlayerController(private val context: Context) {
                 startProgressUpdates()
             } else {
                 stopProgressUpdates()
+                // Save state on pause/stop
+                saveStateToStore()
             }
+        }
+
+        override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+            Log.e(TAG, "Playback Error: ${error.message}", error)
         }
 
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
@@ -59,6 +71,14 @@ class PlayerController(private val context: Context) {
                 description = mediaMetadata.description?.toString(),
                 imageUrl = mediaMetadata.artworkUri?.toString()
             )
+        }
+    }
+
+    private fun saveStateToStore() {
+        val state = _playerUiState.value
+        val guid = state.currentEpisodeGuid ?: return
+        scope.launch(NonCancellable) {
+            playbackStore.saveState(guid, state.currentPositionMillis, state.isPlaying)
         }
     }
 
@@ -92,7 +112,6 @@ class PlayerController(private val context: Context) {
             val mediaController = ensureController()
 
             // Set current episode guid, podcast url, and reset position atomically
-            // This prevents the progress observer from seeing old position with new GUID
             _playerUiState.value = _playerUiState.value.copy(
                 currentEpisodeGuid = guid,
                 podcastUrl = podcastUrl,
@@ -100,6 +119,7 @@ class PlayerController(private val context: Context) {
                 durationMillis = 0L,
                 progress = 0f
             )
+            lastHeartbeatPosition = startPosition
 
             // Build Metadata for Notification
             val metadata = MediaMetadata.Builder()
@@ -117,7 +137,12 @@ class PlayerController(private val context: Context) {
             mediaController.setMediaItem(mediaItem, startPosition)
             mediaController.prepare()
             mediaController.play()
-            Log.d("PlayerController", "Playing: $title by $artist from ${startPosition}ms")
+            Log.d(TAG, "Playing: $title by $artist from ${startPosition}ms")
+
+            // Save state to PlaybackStore on new play
+            scope.launch(NonCancellable) {
+                playbackStore.saveState(guid, startPosition, true)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -169,10 +194,10 @@ class PlayerController(private val context: Context) {
     }
 
     /**
-     * Restore the player state without auto-playing.
-     * Used on app launch to show the Mini Player with the last played episode.
+     * Prepare a session from saved state. Loads the media and seeks to position.
+     * Starts playing only if [autoPlay] is true (i.e., was playing when state was saved).
      */
-    suspend fun restore(
+    suspend fun prepareSession(
         guid: String,
         url: String,
         title: String,
@@ -180,7 +205,8 @@ class PlayerController(private val context: Context) {
         imageUrl: String?,
         description: String?,
         podcastUrl: String?,
-        startPosition: Long = 0L
+        position: Long,
+        autoPlay: Boolean = false
     ) = withContext(Dispatchers.Main) {
         try {
             val mediaController = ensureController()
@@ -189,11 +215,12 @@ class PlayerController(private val context: Context) {
             _playerUiState.value = _playerUiState.value.copy(
                 currentEpisodeGuid = guid,
                 podcastUrl = podcastUrl,
-                currentPositionMillis = startPosition,
+                currentPositionMillis = position,
                 durationMillis = 0L,
                 progress = 0f,
                 isPlaying = false
             )
+            lastHeartbeatPosition = position
 
             // Build Metadata for Notification
             val metadata = MediaMetadata.Builder()
@@ -208,10 +235,15 @@ class PlayerController(private val context: Context) {
                 .setMediaMetadata(metadata)
                 .build()
 
-            mediaController.setMediaItem(mediaItem, startPosition)
+            mediaController.setMediaItem(mediaItem, position)
             mediaController.prepare()
-            // Do NOT call play() - leave paused so Mini Player shows but audio doesn't start
-            Log.d("PlayerController", "Restored: $title by $artist at ${startPosition}ms (paused)")
+
+            if (autoPlay) {
+                mediaController.play()
+                Log.d(TAG, "Restored & playing: $title by $artist at ${position}ms")
+            } else {
+                Log.d(TAG, "Restored (paused): $title by $artist at ${position}ms")
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -231,6 +263,17 @@ class PlayerController(private val context: Context) {
                             currentPositionMillis = position,
                             durationMillis = duration
                         )
+
+                        // Heartbeat: save to PlaybackStore every ~10 seconds
+                        if (position - lastHeartbeatPosition >= 10_000) {
+                            val guid = _playerUiState.value.currentEpisodeGuid
+                            if (guid != null) {
+                                launch(NonCancellable) {
+                                    playbackStore.saveState(guid, position, true)
+                                }
+                                lastHeartbeatPosition = position
+                            }
+                        }
                     }
                 }
                 delay(1000)
@@ -248,5 +291,9 @@ class PlayerController(private val context: Context) {
         controller?.removeListener(playerListener)
         controller?.release()
         controller = null
+    }
+
+    companion object {
+        private const val TAG = "PlayerController"
     }
 }

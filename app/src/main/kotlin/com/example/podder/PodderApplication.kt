@@ -63,11 +63,11 @@ class PodderApplication : Application() {
             searchService
         )
 
-        // PlayerController (Application Scope - singleton)
-        playerController = PlayerController(applicationContext)
-
         // PlaybackStore for session restoration (Application Scope - singleton)
         playbackStore = PlaybackStore(applicationContext)
+
+        // PlayerController (Application Scope - singleton) - receives PlaybackStore for event-triggered saves
+        playerController = PlayerController(applicationContext, playbackStore)
 
         // Schedule background sync
         SyncScheduler.schedulePeriodicSync(applicationContext)

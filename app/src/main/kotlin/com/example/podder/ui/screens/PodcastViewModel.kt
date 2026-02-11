@@ -107,20 +107,20 @@ class PodcastViewModel(
         Log.d(TAG, "restoreLastPlayed() called")
         viewModelScope.launch {
             try {
+                // READ from PlaybackStore (single source of truth for session state)
                 Log.d(TAG, "Reading from PlaybackStore...")
-                val lastPlayed = playbackStore.lastPlayed.first()
-                Log.d(TAG, "PlaybackStore returned: $lastPlayed")
+                val sessionState = playbackStore.getSessionState().first()
+                Log.d(TAG, "PlaybackStore returned: $sessionState")
 
-                if (lastPlayed == null) {
-                    Log.d(TAG, "No last played found in DataStore")
+                if (sessionState == null) {
+                    Log.d(TAG, "No session state found in DataStore")
                     return@launch
                 }
-                val (guid, _) = lastPlayed
 
-                Log.d(TAG, "Looking up episode with guid: $guid")
-                val episode = repository.getEpisode(guid)
+                Log.d(TAG, "Looking up episode with guid: ${sessionState.guid}")
+                val episode = repository.getEpisode(sessionState.guid)
                 if (episode == null) {
-                    Log.d(TAG, "Episode not found in database for guid: $guid")
+                    Log.d(TAG, "Episode not found in database for guid: ${sessionState.guid}")
                     return@launch
                 }
 
@@ -141,8 +141,10 @@ class PodcastViewModel(
                     episode.audioUrl
                 }
 
-                Log.d(TAG, "Restoring last played: ${episode.title} at ${episode.progressInMillis}ms")
-                playerController.restore(
+                // Use position from PlaybackStore (accurate real-time state), not Room DB
+                val position = sessionState.position
+                Log.d(TAG, "Restoring last played: ${episode.title} at ${position}ms (wasPlaying=${sessionState.isPlaying})")
+                playerController.prepareSession(
                     guid = episode.guid,
                     url = playUrl,
                     title = episode.title,
@@ -150,14 +152,15 @@ class PodcastViewModel(
                     imageUrl = podcast.imageUrl,
                     description = episode.description,
                     podcastUrl = episode.podcastUrl,
-                    startPosition = episode.progressInMillis
+                    position = position,
+                    autoPlay = sessionState.isPlaying
                 )
                 AppLogger.log(
                     application,
                     Originator.APP,
                     "SessionRestore",
                     "Session Restored",
-                    "Title: ${episode.title}, Position: ${episode.progressInMillis}ms"
+                    "Title: ${episode.title}, Position: ${position}ms, AutoPlay: ${sessionState.isPlaying}"
                 )
                 Log.d(TAG, "Restore complete")
             } catch (e: Exception) {
@@ -173,28 +176,24 @@ class PodcastViewModel(
                 val position = state.currentPositionMillis
                 val duration = state.durationMillis
 
-                // If GUID changed, reset tracking and save to PlaybackStore
+                // If GUID changed, reset tracking
                 if (guid != lastSavedGuid) {
                     Log.d(TAG, "Episode changed to: $guid, resetting progress tracking")
                     lastSavedGuid = guid
                     lastSavedPosition = position
-                    // Save last played episode to DataStore
-                    launch(NonCancellable) {
-                        playbackStore.saveLastPlayed(guid, state.podcastUrl)
-                    }
                     return@collect
                 }
 
                 // Only save if we have valid duration (media is loaded)
                 if (duration <= 0) return@collect
 
-                // Save on pause or every 10 seconds of playback
+                // Save to Room DB on pause or every 10 seconds of playback
+                // (PlaybackStore saves are handled by PlayerController)
                 val shouldSave = (!state.isPlaying && position > 0) ||
                     (position - lastSavedPosition >= 10_000)
 
                 if (shouldSave) {
-                    Log.d(TAG, "Saving progress: guid=$guid, position=${position}ms")
-                    // Use NonCancellable to ensure DB write survives app death
+                    Log.d(TAG, "Saving progress to DB: guid=$guid, position=${position}ms")
                     launch(NonCancellable) {
                         repository.saveProgress(guid, position)
                         AppLogger.log(
@@ -223,13 +222,15 @@ class PodcastViewModel(
     fun process(action: PodcastAction) {
         Log.d(TAG, "Action: ${action::class.simpleName} from ${action.source}")
 
-        // Centralized entry log for all actions
-        AppLogger.log(
-            application,
-            Originator.USER,
-            action.javaClass.simpleName,
-            "Processing"
-        )
+        // Centralized entry log for all actions (skip error report actions - they have dedicated logging)
+        if (action !is PodcastAction.StartErrorReport && action !is PodcastAction.SubmitErrorReport) {
+            AppLogger.log(
+                application,
+                Originator.USER,
+                action.javaClass.simpleName,
+                "Processing"
+            )
+        }
 
         when (action) {
             is PodcastAction.FetchPodcasts -> {
@@ -245,9 +246,6 @@ class PodcastViewModel(
                     // Reset progress tracking for new episode
                     lastSavedGuid = action.guid
                     lastSavedPosition = startPosition
-
-                    // Save last played to DataStore for session restoration
-                    playbackStore.saveLastPlayed(action.guid, action.podcastUrl)
 
                     // Check for local file - use it if exists
                     val localPath = episode?.localFilePath
@@ -408,6 +406,21 @@ class PodcastViewModel(
                 Log.d(TAG, "  Clear search")
                 _searchResults.value = emptyList()
                 _isSearching.value = false
+            }
+            is PodcastAction.StartErrorReport -> {
+                Log.d(TAG, "  Start error report from ${action.source}")
+                AppLogger.log(
+                    application,
+                    Originator.USER,
+                    "ErrorReport",
+                    "Report Pending",
+                    "Source: ${action.source}"
+                )
+            }
+            is PodcastAction.SubmitErrorReport -> {
+                Log.d(TAG, "  Submit error report: ${action.message}")
+                // Find and update the pending entry instead of creating a new one
+                AppLogger.updatePendingErrorReport(application, action.message)
             }
         }
     }

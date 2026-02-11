@@ -31,4 +31,7 @@ sealed interface PodcastAction : Traceable {
     data class SeekTo(val positionMillis: Long, override val source: String, override val timestamp: Long) : PodcastAction
     data class Download(val guid: String, val url: String, val title: String, override val source: String, override val timestamp: Long) : PodcastAction
     data class DeleteDownload(val guid: String, val localFilePath: String, override val source: String, override val timestamp: Long) : PodcastAction
+
+    data class StartErrorReport(override val source: String, override val timestamp: Long) : PodcastAction
+    data class SubmitErrorReport(val message: String, val startTimestamp: Long, override val source: String, override val timestamp: Long) : PodcastAction
 }

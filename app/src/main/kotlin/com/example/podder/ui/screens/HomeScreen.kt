@@ -69,6 +69,11 @@ fun HomeScreen(
     // Optimistic UI: track episodes being marked as finished (before DB update)
     var pendingFinishedGuids by remember { mutableStateOf(setOf<String>()) }
 
+    // Error report dialog state
+    var showReportDialog by remember { mutableStateOf(false) }
+    var reportText by remember { mutableStateOf("") }
+    var reportStartTimestamp by remember { mutableStateOf(0L) }
+
     // Look up the current episode from the list to get fresh data (including localFilePath)
     val selectedEpisode = remember(uiState, selectedGuid) {
         if (selectedGuid == null) null
@@ -223,7 +228,21 @@ fun HomeScreen(
             } else {
                 // Normal toolbar
                 TopAppBar(
-                    title = { Text("Podder") },
+                    title = {
+                        Text(
+                            text = "Podder",
+                            modifier = Modifier.clickable {
+                                reportStartTimestamp = System.currentTimeMillis()
+                                viewModel.process(
+                                    PodcastAction.StartErrorReport(
+                                        source = "HomeScreen",
+                                        timestamp = reportStartTimestamp
+                                    )
+                                )
+                                showReportDialog = true
+                            }
+                        )
+                    },
                     actions = {
                         IconButton(onClick = { navController.navigate(Subscriptions) }) {
                             Icon(Icons.Filled.Subscriptions, contentDescription = "Subscriptions")
@@ -356,6 +375,54 @@ fun HomeScreen(
                 )
             }
         }
+    }
+
+    // Error Report Dialog
+    if (showReportDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showReportDialog = false
+                reportText = ""
+            },
+            title = { Text("Report an Issue") },
+            text = {
+                OutlinedTextField(
+                    value = reportText,
+                    onValueChange = { reportText = it },
+                    label = { Text("Describe the issue") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.process(
+                            PodcastAction.SubmitErrorReport(
+                                message = reportText,
+                                startTimestamp = reportStartTimestamp,
+                                source = "HomeScreen",
+                                timestamp = System.currentTimeMillis()
+                            )
+                        )
+                        showReportDialog = false
+                        reportText = ""
+                    }
+                ) {
+                    Text("Submit")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showReportDialog = false
+                        reportText = ""
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

@@ -65,4 +65,73 @@ object AppLogger {
             }
         }
     }
+
+    /**
+     * Updates a pending error report entry (within last 5 minutes) with the submitted message.
+     * If no pending entry is found, creates a new entry.
+     */
+    fun updatePendingErrorReport(
+        context: Context,
+        message: String
+    ) {
+        val now = System.currentTimeMillis()
+        val fiveMinutesAgo = now - 5 * 60 * 1000
+
+        scope.launch {
+            try {
+                val logFile = File(context.filesDir, LOG_FILE_NAME)
+                if (!logFile.exists()) {
+                    // No log file, create new entry
+                    log(context, Originator.USER, "ErrorReport", "Report Submitted", "Message: $message")
+                    return@launch
+                }
+
+                val lines = logFile.readLines().toMutableList()
+                var foundIndex = -1
+
+                // Search backwards for a pending error report within the time window
+                for (i in lines.indices.reversed()) {
+                    val line = lines[i]
+                    if (line.contains("[  ErrorReport   ]") && line.contains("[   Report Pending   ]")) {
+                        // Parse timestamp from the line (format: MM/dd HH:mm:ss.SSS)
+                        val timestampStr = line.substring(0, 18)
+                        try {
+                            val entryTime = dateFormat.parse(timestampStr)?.time ?: continue
+                            // Adjust for year (dateFormat doesn't include year, assume current year)
+                            val calendar = java.util.Calendar.getInstance()
+                            val currentYear = calendar.get(java.util.Calendar.YEAR)
+                            calendar.time = dateFormat.parse(timestampStr) ?: continue
+                            calendar.set(java.util.Calendar.YEAR, currentYear)
+                            val adjustedTime = calendar.timeInMillis
+
+                            if (adjustedTime >= fiveMinutesAgo) {
+                                foundIndex = i
+                                break
+                            }
+                        } catch (e: Exception) {
+                            continue
+                        }
+                    }
+                }
+
+                if (foundIndex >= 0) {
+                    // Update the pending entry
+                    val timestamp = dateFormat.format(Date())
+                    val originatorStr = Originator.USER.name.center(ORIGINATOR_WIDTH)
+                    val requestStr = "ErrorReport".center(REQUEST_WIDTH)
+                    val actionStr = "Report Submitted".center(ACTION_WIDTH)
+                    val updatedLine = "$timestamp [$originatorStr][$requestStr][$actionStr] Message: $message"
+
+                    lines[foundIndex] = updatedLine
+                    logFile.writeText(lines.joinToString("\n") + "\n")
+                    Log.d(TAG, updatedLine)
+                } else {
+                    // No pending entry found, create new
+                    log(context, Originator.USER, "ErrorReport", "Report Submitted", "Message: $message")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to update error report: ${e.message}", e)
+            }
+        }
+    }
 }
