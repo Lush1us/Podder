@@ -62,6 +62,7 @@ CMakeFiles/
 CMakeCache.txt
 *.cmake
 !CMakeLists.txt
+/androidApp/.cxx/
 
 # ─── Secrets / environment ────────────────────────────────────────────────────
 *.env
