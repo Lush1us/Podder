@@ -68,4 +68,5 @@ class PlaybackViewModel(
     fun stop()   = stateMachine.stop()
     fun seekTo(positionMs: Long) = stateMachine.seekTo(positionMs)
     fun setPlaybackSpeed(speed: Float) = stateMachine.setPlaybackSpeed(speed)
+    fun setScrubbing(enabled: Boolean) = stateMachine.setScrubbing(enabled)
 }

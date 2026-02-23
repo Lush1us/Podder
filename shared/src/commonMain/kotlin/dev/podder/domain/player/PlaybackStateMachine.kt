@@ -28,6 +28,9 @@ class PlaybackStateMachine(private val kvStore: KVStore) {
     private val _speed = MutableStateFlow(1.0f)
     val speed: StateFlow<Float> = _speed.asStateFlow()
 
+    private val _scrubbing = MutableStateFlow(false)
+    val scrubbing: StateFlow<Boolean> = _scrubbing.asStateFlow()
+
     fun onBuffering(trackId: String) {
         _state.value = PlaybackState.Buffering(trackId)
     }
@@ -121,6 +124,10 @@ class PlaybackStateMachine(private val kvStore: KVStore) {
     /** Set playback speed. Platform layer observes speed and applies it. */
     fun setPlaybackSpeed(speed: Float) {
         _speed.value = speed.coerceIn(0.5f, 3.0f)
+    }
+
+    fun setScrubbing(enabled: Boolean) {
+        _scrubbing.value = enabled
     }
 
     fun resumePosition(trackId: String): Long = kvStore.getLong("resume_$trackId", 0L)

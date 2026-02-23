@@ -44,6 +44,7 @@ class PodderMediaService : MediaSessionService() {
             )
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_LOCAL)
+            .experimentalSetDynamicSchedulingEnabled(true)
             .build()
         mediaSession = MediaSession.Builder(this, player).build()
 
@@ -51,6 +52,7 @@ class PodderMediaService : MediaSessionService() {
         observePlayer()
         observeSeek()
         observeSpeed()
+        observeScrubbing()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
@@ -149,6 +151,14 @@ class PodderMediaService : MediaSessionService() {
                 .collect { speed ->
                     player.setPlaybackParameters(PlaybackParameters(speed))
                 }
+        }
+    }
+
+    private fun observeScrubbing() {
+        scope.launch {
+            stateMachine.scrubbing.collect { enabled ->
+                player.setScrubbingModeEnabled(enabled)
+            }
         }
     }
 

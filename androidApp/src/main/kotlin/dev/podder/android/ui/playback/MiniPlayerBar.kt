@@ -134,6 +134,7 @@ fun MiniPlayerBar(
                             longPressResult == null -> {
                                 // Timeout elapsed = long press established → enter scrub mode
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                vm.setScrubbing(true)
                                 scrollMode = true
                                 wasPlayingBeforeScroll = state is PlaybackState.Playing
 
@@ -178,6 +179,7 @@ fun MiniPlayerBar(
                                 stopResumeJobRef.job?.cancel()
                                 vm.seekTo(scrollSeekPositionMs)
                                 if (wasPlayingBeforeScroll) vm.resume()
+                                vm.setScrubbing(false)
                                 scrollMode = false
                             }
 
