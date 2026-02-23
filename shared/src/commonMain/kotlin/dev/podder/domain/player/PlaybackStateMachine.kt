@@ -31,6 +31,9 @@ class PlaybackStateMachine(private val kvStore: KVStore) {
     private val _scrubbing = MutableStateFlow(false)
     val scrubbing: StateFlow<Boolean> = _scrubbing.asStateFlow()
 
+    private val _pendingResume = MutableStateFlow(false)
+    val pendingResume: StateFlow<Boolean> = _pendingResume.asStateFlow()
+
     fun onBuffering(trackId: String) {
         _state.value = PlaybackState.Buffering(trackId)
     }
@@ -87,8 +90,12 @@ class PlaybackStateMachine(private val kvStore: KVStore) {
     fun resume() {
         val current = _state.value
         if (current is PlaybackState.Paused) {
-            _state.value = PlaybackState.Buffering(current.trackId)
+            _pendingResume.value = true
         }
+    }
+
+    fun consumePendingResume() {
+        _pendingResume.value = false
     }
 
     fun stop() {

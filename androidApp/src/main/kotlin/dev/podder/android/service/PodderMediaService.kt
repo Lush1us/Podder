@@ -17,6 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
@@ -53,6 +54,7 @@ class PodderMediaService : MediaSessionService() {
         observeSeek()
         observeSpeed()
         observeScrubbing()
+        observeResume()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
@@ -159,6 +161,17 @@ class PodderMediaService : MediaSessionService() {
             stateMachine.scrubbing.collect { enabled ->
                 player.setScrubbingModeEnabled(enabled)
             }
+        }
+    }
+
+    private fun observeResume() {
+        scope.launch {
+            stateMachine.pendingResume
+                .filter { it }
+                .collect {
+                    player.play()
+                    stateMachine.consumePendingResume()
+                }
         }
     }
 
