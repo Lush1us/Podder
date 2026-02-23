@@ -1,0 +1,47 @@
+CREATE TABLE Episodes (
+    id                 TEXT    NOT NULL PRIMARY KEY,
+    podcastId          TEXT    NOT NULL,
+    title              TEXT    NOT NULL,
+    url                TEXT    NOT NULL,
+    durationMs         INTEGER NOT NULL DEFAULT 0,
+    playCount          INTEGER NOT NULL DEFAULT 0,
+    isDownloaded       INTEGER NOT NULL DEFAULT 0,
+    publicationDateUtc INTEGER NOT NULL DEFAULT 0,
+    description        TEXT    NOT NULL DEFAULT '',
+    FOREIGN KEY (podcastId) REFERENCES Podcasts(id) ON DELETE CASCADE
+);
+
+selectAll:
+SELECT * FROM Episodes;
+
+selectByPodcast:
+SELECT * FROM Episodes WHERE podcastId = ? ORDER BY publicationDateUtc DESC;
+
+selectById:
+SELECT * FROM Episodes WHERE id = ? LIMIT 1;
+
+selectAllNewestFirst:
+SELECT Episodes.id, Episodes.podcastId, Episodes.title, Episodes.url,
+       Episodes.durationMs, Episodes.playCount, Episodes.isDownloaded,
+       Episodes.publicationDateUtc, Episodes.description, Podcasts.title AS podcastTitle
+FROM Episodes
+JOIN Podcasts ON Episodes.podcastId = Podcasts.id
+ORDER BY Episodes.publicationDateUtc DESC;
+
+selectUnplayedDownloaded:
+SELECT Episodes.*, Podcasts.priority
+FROM Episodes
+JOIN Podcasts ON Episodes.podcastId = Podcasts.id
+WHERE Episodes.playCount = 0
+  AND Episodes.isDownloaded = 1
+ORDER BY Podcasts.priority DESC, Episodes.publicationDateUtc ASC;
+
+insert:
+INSERT OR REPLACE INTO Episodes(id, podcastId, title, url, durationMs, playCount, isDownloaded, publicationDateUtc, description)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+incrementPlayCount:
+UPDATE Episodes SET playCount = playCount + 1 WHERE id = ?;
+
+deleteById:
+DELETE FROM Episodes WHERE id = ?;

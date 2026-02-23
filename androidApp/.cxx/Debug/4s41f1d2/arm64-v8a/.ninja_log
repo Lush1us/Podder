@@ -1,0 +1,5 @@
+# ninja log v5
+0	22	1771725887156505629	CMakeFiles/kvstore.dir/kvstore_jni.cpp.o	e92c83898a0f6f6f
+352	370	1771725887504528285	/var/home/Lush1us/Nextcloud/deVibe/environments/Podder/androidApp/build/intermediates/cxx/Debug/4s41f1d2/obj/arm64-v8a/libkvstore.so	b423c5e43de74b
+0	351	1771725887483498536	CMakeFiles/kvstore.dir/kvstore.cpp.o	777bc779ba6bad9c
+8	43	1771766007424307918	/var/home/Lush1us/Nextcloud/deVibe/environments/Podder/androidApp/build/intermediates/cxx/Debug/4s41f1d2/obj/arm64-v8a/libkvstore.so	5473b88cd9300780

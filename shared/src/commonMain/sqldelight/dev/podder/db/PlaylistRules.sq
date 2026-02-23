@@ -1,0 +1,17 @@
+CREATE TABLE Playlist_Rules (
+    id         TEXT NOT NULL PRIMARY KEY,
+    playlistId TEXT NOT NULL,
+    field      TEXT NOT NULL,
+    operator   TEXT NOT NULL,
+    value      TEXT NOT NULL
+);
+
+selectByPlaylist:
+SELECT * FROM Playlist_Rules WHERE playlistId = ?;
+
+insert:
+INSERT OR REPLACE INTO Playlist_Rules(id, playlistId, field, operator, value)
+VALUES (?, ?, ?, ?, ?);
+
+deleteByPlaylist:
+DELETE FROM Playlist_Rules WHERE playlistId = ?;

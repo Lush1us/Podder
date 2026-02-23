@@ -1,0 +1,38 @@
+CREATE TABLE Tracks (
+    id                  TEXT    NOT NULL PRIMARY KEY,
+    title               TEXT    NOT NULL,
+    url                 TEXT    NOT NULL,
+    mediaType           TEXT    NOT NULL,
+    artistId            TEXT,
+    albumId             TEXT,
+    podcastId           TEXT,
+    durationMs          INTEGER NOT NULL DEFAULT 0,
+    playCount           INTEGER NOT NULL DEFAULT 0,
+    isDownloaded        INTEGER NOT NULL DEFAULT 0,
+    publicationDateUtc  INTEGER NOT NULL DEFAULT 0
+);
+
+selectAll:
+SELECT * FROM Tracks;
+
+selectById:
+SELECT * FROM Tracks WHERE id = ?;
+
+selectByMediaType:
+SELECT * FROM Tracks WHERE mediaType = ?;
+
+selectUnplayedDownloaded:
+SELECT * FROM Tracks
+WHERE playCount = 0
+  AND isDownloaded = 1
+ORDER BY publicationDateUtc ASC;
+
+insert:
+INSERT OR REPLACE INTO Tracks(id, title, url, mediaType, artistId, albumId, podcastId, durationMs, playCount, isDownloaded, publicationDateUtc)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+incrementPlayCount:
+UPDATE Tracks SET playCount = playCount + 1 WHERE id = ?;
+
+deleteById:
+DELETE FROM Tracks WHERE id = ?;

@@ -1,0 +1,24 @@
+CREATE TABLE Podcasts (
+    id             TEXT    NOT NULL PRIMARY KEY,
+    title          TEXT    NOT NULL,
+    rssUrl         TEXT    NOT NULL,
+    artworkUrl     TEXT,
+    priority       INTEGER NOT NULL DEFAULT 0,
+    lastFetchedUtc INTEGER NOT NULL DEFAULT 0
+);
+
+selectAll:
+SELECT * FROM Podcasts;
+
+selectById:
+SELECT * FROM Podcasts WHERE id = ?;
+
+insert:
+INSERT OR REPLACE INTO Podcasts(id, title, rssUrl, artworkUrl, priority, lastFetchedUtc)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updateLastFetched:
+UPDATE Podcasts SET lastFetchedUtc = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM Podcasts WHERE id = ?;

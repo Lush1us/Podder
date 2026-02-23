@@ -1,0 +1,19 @@
+CREATE TABLE Albums (
+    id         TEXT NOT NULL PRIMARY KEY,
+    artistId   TEXT NOT NULL,
+    title      TEXT NOT NULL,
+    artworkUrl TEXT,
+    FOREIGN KEY (artistId) REFERENCES Artists(id) ON DELETE CASCADE
+);
+
+selectAll:
+SELECT * FROM Albums;
+
+selectByArtist:
+SELECT * FROM Albums WHERE artistId = ?;
+
+insert:
+INSERT OR REPLACE INTO Albums(id, artistId, title, artworkUrl) VALUES (?, ?, ?, ?);
+
+deleteById:
+DELETE FROM Albums WHERE id = ?;

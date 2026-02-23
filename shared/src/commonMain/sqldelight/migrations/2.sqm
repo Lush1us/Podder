@@ -1,0 +1,1 @@
+ALTER TABLE Episodes ADD COLUMN description TEXT NOT NULL DEFAULT '';

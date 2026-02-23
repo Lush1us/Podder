@@ -1,0 +1,74 @@
+# ─── Gradle ───────────────────────────────────────────────────────────────────
+.gradle/
+build/
+**/build/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+.gradletasknamecache
+
+# ─── Android ──────────────────────────────────────────────────────────────────
+local.properties
+*.apk
+*.aab
+*.ap_
+proguard/
+*.class
+
+# ─── Kotlin ───────────────────────────────────────────────────────────────────
+*.iml
+*.ipr
+*.iws
+out/
+
+# ─── Xcode ────────────────────────────────────────────────────────────────────
+*.xcuserstate
+xcuserdata/
+*.xcuserdata/
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.xcarchive
+*.xcworkspace/xcuserdata/
+
+# ─── CocoaPods ────────────────────────────────────────────────────────────────
+Pods/
+*.xcworkspace
+!default.xcworkspace
+
+# ─── Swift Package Manager ────────────────────────────────────────────────────
+.build/
+.swiftpm/
+*.resolved
+
+# ─── macOS / IDE ──────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# ─── IntelliJ / Android Studio ───────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ─── CMake / C++ ──────────────────────────────────────────────────────────────
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+*.cmake
+!CMakeLists.txt
+
+# ─── Secrets / environment ────────────────────────────────────────────────────
+*.env
+*.env.*
+secrets.properties
+keystore.properties
+*.jks
+*.keystore
+google-services.json
+GoogleService-Info.plist

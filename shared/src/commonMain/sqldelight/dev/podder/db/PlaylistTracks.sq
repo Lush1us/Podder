@@ -1,0 +1,18 @@
+CREATE TABLE Playlist_Tracks (
+    playlistId TEXT NOT NULL,
+    trackId    TEXT NOT NULL,
+    position   INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (playlistId, trackId)
+);
+
+selectTracksByPlaylist:
+SELECT * FROM Playlist_Tracks WHERE playlistId = ? ORDER BY position ASC;
+
+insert:
+INSERT OR REPLACE INTO Playlist_Tracks(playlistId, trackId, position) VALUES (?, ?, ?);
+
+deleteByPlaylist:
+DELETE FROM Playlist_Tracks WHERE playlistId = ?;
+
+deleteEntry:
+DELETE FROM Playlist_Tracks WHERE playlistId = ? AND trackId = ?;
