@@ -1,6 +1,7 @@
 package dev.podder.android.ui.feed
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,7 +13,10 @@ import dev.podder.data.repository.FeedEpisode
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun FeedScreen(modifier: Modifier = Modifier) {
+fun FeedScreen(
+    onEpisodeLongPress: (episodeId: String, url: String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val vm: FeedViewModel = koinViewModel()
     val playbackVm: PlaybackViewModel = koinViewModel()
     val episodes by vm.episodes.collectAsState()
@@ -20,18 +24,24 @@ fun FeedScreen(modifier: Modifier = Modifier) {
     LazyColumn(modifier.fillMaxSize()) {
         items(episodes, key = { it.id }) { episode ->
             FeedEpisodeRow(
-                episode = episode,
-                onClick = { playbackVm.play(episode.id, episode.url) },
+                episode    = episode,
+                onClick    = { playbackVm.play(episode.id, episode.url) },
+                onLongPress = { onEpisodeLongPress(episode.id, episode.url) },
             )
             HorizontalDivider()
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FeedEpisodeRow(episode: FeedEpisode, onClick: () -> Unit) {
+private fun FeedEpisodeRow(
+    episode: FeedEpisode,
+    onClick: () -> Unit,
+    onLongPress: () -> Unit,
+) {
     ListItem(
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongPress),
         headlineContent   = { Text(episode.title) },
         supportingContent = {
             val mins = episode.durationMs / 60_000
