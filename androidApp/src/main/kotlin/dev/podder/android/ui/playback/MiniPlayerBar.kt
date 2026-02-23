@@ -24,14 +24,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import dev.podder.domain.model.PlaybackState
+import kotlin.math.pow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.androidx.compose.koinViewModel
 
-/** 1 dp of horizontal drag = 1000 ms (1 second) of seek offset */
-private const val MS_PER_DP = 1000f
+/** Exponent for the scrub speed curve. 1.0 = linear, 2.0 = quadratic (slow near entry, fast at edges). */
+private const val SCRUB_CURVE_EXPONENT = 2.0
 /** Milliseconds of stillness before resuming audio mid-hold */
 private const val STOP_RESUME_DELAY_MS = 200L
 
@@ -149,6 +150,13 @@ fun MiniPlayerBar(
                                 baseSeekPositionMs   = currentPos
                                 scrollSeekPositionMs = currentPos
 
+                                val tapXDp         = with(density) { down.position.x.toDp().value }
+                                val maxLeftDragDp  = tapXDp.coerceAtLeast(1f)
+                                val maxRightDragDp = (screenWidthDp.toFloat() - tapXDp).coerceAtLeast(1f)
+                                val entryElapsedMs   = currentPos
+                                val entryRemainingMs = ((info?.durationMs ?: 0L) - currentPos).coerceAtLeast(1L)
+                                var cumulativeDragDp = 0f
+
                                 // Track horizontal drag until finger lifts
                                 while (true) {
                                     val event  = awaitPointerEvent()
@@ -158,10 +166,14 @@ fun MiniPlayerBar(
                                     change.consume()
 
                                     val dpDelta = with(density) { (change.position - change.previousPosition).x.toDp().value }
-                                    val msDelta = (dpDelta * MS_PER_DP).toLong()
-                                    val durationMs = info?.durationMs ?: 0L
-                                    scrollSeekPositionMs = (scrollSeekPositionMs + msDelta)
-                                        .coerceIn(0L, if (durationMs > 0L) durationMs else Long.MAX_VALUE)
+                                    cumulativeDragDp += dpDelta
+                                    scrollSeekPositionMs = if (cumulativeDragDp <= 0f) {
+                                        val t = (-cumulativeDragDp / maxLeftDragDp).coerceIn(0.0, 1.0)
+                                        baseSeekPositionMs - (entryElapsedMs * t.toDouble().pow(SCRUB_CURVE_EXPONENT)).toLong()
+                                    } else {
+                                        val t = (cumulativeDragDp / maxRightDragDp).coerceIn(0.0, 1.0)
+                                        baseSeekPositionMs + (entryRemainingMs * t.toDouble().pow(SCRUB_CURVE_EXPONENT)).toLong()
+                                    }
                                     vm.seekTo(scrollSeekPositionMs)
 
                                     // Restart the stop-resume timer on each movement
@@ -169,7 +181,6 @@ fun MiniPlayerBar(
                                     stopResumeJobRef.job = scope.launch {
                                         delay(STOP_RESUME_DELAY_MS)
                                         if (scrollMode) {
-                                            baseSeekPositionMs = scrollSeekPositionMs
                                             vm.resume()
                                         }
                                     }
