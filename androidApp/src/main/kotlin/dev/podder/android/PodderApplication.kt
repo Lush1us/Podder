@@ -1,9 +1,14 @@
 package dev.podder.android
 
 import android.app.Application
-import dev.podder.data.db.DatabaseDriverFactory
 import dev.podder.android.di.appModule
+import dev.podder.android.download.DownloadRepository
+import dev.podder.data.db.DatabaseDriverFactory
 import dev.podder.di.sharedModule
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -19,6 +24,10 @@ class PodderApplication : Application() {
                 ),
                 appModule,
             )
+        }
+        val downloadRepository: DownloadRepository by inject()
+        CoroutineScope(Dispatchers.IO).launch {
+            downloadRepository.cleanupExpiredAutoCache()
         }
     }
 }

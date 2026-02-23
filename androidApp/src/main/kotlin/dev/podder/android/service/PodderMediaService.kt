@@ -5,9 +5,12 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import dev.podder.android.download.DownloadRepository
 import dev.podder.domain.model.PlaybackState
 import dev.podder.domain.player.PlaybackStateMachine
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +30,8 @@ import org.koin.android.ext.android.inject
 class PodderMediaService : MediaSessionService() {
 
     private val stateMachine: PlaybackStateMachine by inject()
+    private val cacheDataSourceFactory: CacheDataSource.Factory by inject()
+    private val downloadRepository: DownloadRepository by inject()
 
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
@@ -46,6 +51,7 @@ class PodderMediaService : MediaSessionService() {
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .experimentalSetDynamicSchedulingEnabled(true)
+            .setMediaSourceFactory(DefaultMediaSourceFactory(cacheDataSourceFactory))
             .build()
         mediaSession = MediaSession.Builder(this, player).build()
 
@@ -85,11 +91,12 @@ class PodderMediaService : MediaSessionService() {
                 .collect {
                     when (val s = stateMachine.state.value) {
                         is PlaybackState.Buffering -> {
-                            stateMachine.pendingPlay()?.let { (_, url, pos) ->
+                            stateMachine.pendingPlay()?.let { (trackId, url, pos) ->
                                 val item = MediaItem.fromUri(url)
                                 player.setMediaItem(item, pos)
                                 player.prepare()
                                 player.play()
+                                downloadRepository.startAutoCache(trackId, url)
                             }
                         }
                         is PlaybackState.Paused -> player.pause()
