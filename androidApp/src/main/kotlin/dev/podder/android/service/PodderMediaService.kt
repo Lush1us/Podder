@@ -115,7 +115,8 @@ class PodderMediaService : MediaSessionService() {
                     startTicks(trackId)
                 } else {
                     stopTicks()
-                    if (player.playbackState != Player.STATE_ENDED) {
+                    // Only report a real pause — not transient stops during seek/buffer
+                    if (player.playbackState != Player.STATE_ENDED && !player.playWhenReady) {
                         stateMachine.onPaused(trackId, player.currentPosition, player.duration.coerceAtLeast(0L))
                     }
                 }

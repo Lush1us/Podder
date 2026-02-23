@@ -121,11 +121,14 @@ fun MiniPlayerBar(
 
                         when {
                             longPressResult == "tap" -> {
-                                // Only route to episode detail if tap was outside the artwork zone
-                                if (down.position.x > artworkZonePx) {
+                                // Route to episode detail only in the middle zone (not artwork, not controls)
+                                val controlsZonePx = artworkZonePx // controls same width as artwork
+                                if (down.position.x > artworkZonePx &&
+                                    down.position.x < (size.width - controlsZonePx)) {
                                     info?.episodeId?.let { currentOnMiddleClick(it) }
                                 }
-                                // If in artwork zone: artwork's own Modifier.clickable handles it
+                                // Artwork zone: artwork's own Modifier.clickable handles it
+                                // Controls zone: IconButton handles it
                             }
 
                             longPressResult == "swipe_up" -> {
@@ -168,10 +171,10 @@ fun MiniPlayerBar(
                                     val dpDelta = with(density) { (change.position - change.previousPosition).x.toDp().value }
                                     cumulativeDragDp += dpDelta
                                     scrollSeekPositionMs = if (cumulativeDragDp <= 0f) {
-                                        val t = (-cumulativeDragDp / maxLeftDragDp).coerceIn(0.0, 1.0)
+                                        val t = (-cumulativeDragDp / maxLeftDragDp).coerceIn(0f, 1f)
                                         baseSeekPositionMs - (entryElapsedMs * t.toDouble().pow(SCRUB_CURVE_EXPONENT)).toLong()
                                     } else {
-                                        val t = (cumulativeDragDp / maxRightDragDp).coerceIn(0.0, 1.0)
+                                        val t = (cumulativeDragDp / maxRightDragDp).coerceIn(0f, 1f)
                                         baseSeekPositionMs + (entryRemainingMs * t.toDouble().pow(SCRUB_CURVE_EXPONENT)).toLong()
                                     }
                                     vm.seekTo(scrollSeekPositionMs)
@@ -188,9 +191,9 @@ fun MiniPlayerBar(
 
                                 // Finger lifted — commit seek and restore playback
                                 stopResumeJobRef.job?.cancel()
+                                vm.setScrubbing(false)
                                 vm.seekTo(scrollSeekPositionMs)
                                 if (wasPlayingBeforeScroll) vm.resume()
-                                vm.setScrubbing(false)
                                 scrollMode = false
                             }
 
@@ -258,7 +261,7 @@ fun MiniPlayerBar(
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .width(64.dp),
+                            .width(playerHeightDp),
                         contentAlignment = Alignment.Center,
                     ) {
                         when (state) {
