@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base app theme — keeps the same window behaviour as before -->
+    <style name="Theme.Podder" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Splash screen theme applied to MainActivity.
+         postSplashScreenTheme switches back to Theme.Podder once the splash exits. -->
+    <style name="Theme.Podder.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.Podder</item>
+    </style>
+
+</resources>

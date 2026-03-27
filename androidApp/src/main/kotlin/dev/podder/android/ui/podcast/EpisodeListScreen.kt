@@ -1,5 +1,6 @@
 package dev.podder.android.ui.podcast
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -7,8 +8,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import dev.podder.android.download.DownloadProgress
 import dev.podder.android.ui.download.DownloadActionButton
@@ -28,10 +31,23 @@ fun EpisodeListScreen(
     val playbackVm: PlaybackViewModel = koinViewModel()
     val downloadVm: DownloadViewModel = koinViewModel()
     val episodes by vm.episodes.collectAsState()
+    val podcastTitle by vm.podcastTitle.collectAsState()
     val progressMap by downloadVm.progressMap.collectAsState()
 
-    var selectedEpisodeId  by remember { mutableStateOf<String?>(null) }
-    var selectedEpisodeUrl by remember { mutableStateOf<String?>(null) }
+    var selectedEpisodeId   by remember { mutableStateOf<String?>(null) }
+    var selectedEpisodeUrl  by remember { mutableStateOf<String?>(null) }
+    var showPodcastSettings by rememberSaveable { mutableStateOf(false) }
+
+    BackHandler(enabled = showPodcastSettings) { showPodcastSettings = false }
+
+    if (showPodcastSettings) {
+        PodcastSettingsScreen(
+            podcastId    = podcastId,
+            podcastTitle = podcastTitle,
+            onBack       = { showPodcastSettings = false },
+        )
+        return
+    }
 
     Scaffold(
         topBar = {
@@ -53,6 +69,9 @@ fun EpisodeListScreen(
                             onStartDownload  = { id, url -> downloadVm.startDownload(id, url) },
                             onCancelDownload = { id -> downloadVm.cancelDownload(id) },
                         )
+                    }
+                    IconButton(onClick = { showPodcastSettings = true }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Podcast Settings")
                     }
                 },
             )

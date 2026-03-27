@@ -6,8 +6,13 @@ import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import android.net.Uri
-import dev.podder.data.db.PodderDatabase
+import dev.podder.android.service.PodderDownloadService
+import dev.podder.db.PodderDatabase
 import dev.podder.data.repository.PodcastRepository
+import dev.podder.logging.LogEvent
+import dev.podder.logging.LogLevel
+import dev.podder.logging.PodderLogger
+import dev.podder.logging.Subsystem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +24,7 @@ class DownloadRepository(
     private val downloadManager: DownloadManager,
     private val database: PodderDatabase,
     private val podcastRepository: PodcastRepository,
+    private val logger: PodderLogger,
 ) {
     /** Submit a manual (permanent) download. No-op if already queued/downloading/done. */
     fun startManualDownload(episodeId: String, url: String) {
@@ -33,6 +39,8 @@ class DownloadRepository(
         )
         val request = DownloadRequest.Builder(episodeId, Uri.parse(url)).build()
         DownloadService.sendAddDownload(context, PodderDownloadService::class.java, request, false)
+        logger.log(LogLevel.INFO, Subsystem.DOWNLOAD,
+            LogEvent.Download.Started(episodeId, isAutoCache = false))
     }
 
     /** Submit a low-footprint auto-cache download. No-op if already tracked. */
@@ -48,11 +56,15 @@ class DownloadRepository(
         )
         val request = DownloadRequest.Builder(episodeId, Uri.parse(url)).build()
         DownloadService.sendAddDownload(context, PodderDownloadService::class.java, request, false)
+        logger.log(LogLevel.INFO, Subsystem.DOWNLOAD,
+            LogEvent.Download.Started(episodeId, isAutoCache = true))
     }
 
     fun cancelDownload(episodeId: String) {
         DownloadService.sendRemoveDownload(context, PodderDownloadService::class.java, episodeId, false)
         database.downloadsQueries.deleteByEpisodeId(episodeId)
+        logger.log(LogLevel.INFO, Subsystem.DOWNLOAD,
+            LogEvent.Download.Cancelled(episodeId))
     }
 
     fun progressFor(episodeId: String): DownloadProgress {
@@ -72,22 +84,25 @@ class DownloadRepository(
         while (true) {
             val infos = mutableListOf<DownloadInfo>()
             val cursor = downloadManager.downloadIndex.getDownloads()
-            while (cursor.moveToNext()) {
-                val dl       = cursor.download
-                val epId     = dl.request.id
-                val url      = dl.request.uri.toString()
-                val episode  = podcastRepository.episodeById(epId)
-                val podcast  = episode?.let { podcastRepository.podcastById(it.podcastId) }
-                infos.add(DownloadInfo(
-                    episodeId    = epId,
-                    episodeTitle = episode?.title ?: epId,
-                    podcastTitle = podcast?.title ?: "",
-                    artworkUrl   = podcast?.artworkUrl,
-                    url          = url,
-                    progress     = progressFor(epId),
-                ))
+            try {
+                while (cursor.moveToNext()) {
+                    val dl       = cursor.download
+                    val epId     = dl.request.id
+                    val url      = dl.request.uri.toString()
+                    val episode  = podcastRepository.episodeById(epId)
+                    val podcast  = episode?.let { podcastRepository.podcastById(it.podcastId) }
+                    infos.add(DownloadInfo(
+                        episodeId    = epId,
+                        episodeTitle = episode?.title ?: epId,
+                        podcastTitle = podcast?.title ?: "",
+                        artworkUrl   = podcast?.artworkUrl,
+                        url          = url,
+                        progress     = progressFor(epId),
+                    ))
+                }
+            } finally {
+                cursor.close()
             }
-            cursor.close()
             emit(infos)
             delay(1_000L)
         }
@@ -96,6 +111,10 @@ class DownloadRepository(
     suspend fun cleanupExpiredAutoCache() {
         val now     = System.currentTimeMillis()
         val expired = database.downloadsQueries.selectExpired(now).executeAsList()
+        if (expired.isNotEmpty()) {
+            logger.log(LogLevel.INFO, Subsystem.DOWNLOAD,
+                LogEvent.Download.ExpiredCleanup(expired.size))
+        }
         for (row in expired) {
             DownloadService.sendRemoveDownload(
                 context, PodderDownloadService::class.java, row.episodeId, false

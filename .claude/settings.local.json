@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(journalctl --user -u podder-chat --since \"08:41:00\" --no-pager)",
+      "Bash(curl -v -d \"test notification\" http://100.78.163.64:2586/podder-dev 2>&1)",
+      "Bash(claude -p \"say the word hi\" --output-format json 2>&1)",
+      "Bash(CLAUDECODE= /home/linuxbrew/.linuxbrew/bin/claude -p \"say hi\" --output-format json 2>&1; echo \"EXIT: $?\")",
+      "Bash(journalctl --user -u podder-chat -n 30 --no-pager)",
+      "Bash(curl -s -d \"hello from test\" http://100.78.163.64:2586/podder-chat && sleep 15 && journalctl --user -u podder-chat --since \"09:03:00\" --no-pager)",
+      "Bash(script -q -c \"CLAUDECODE= /home/linuxbrew/.linuxbrew/bin/claude -p 'say hi' --output-format json\" /dev/null 2>&1; echo \"EXIT: $?\")"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "devibe"
+  ]
+}

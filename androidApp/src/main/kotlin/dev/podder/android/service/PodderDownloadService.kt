@@ -1,6 +1,7 @@
 package dev.podder.android.service
 
 import android.app.Notification
+import dev.podder.android.R
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper
@@ -12,12 +13,12 @@ class PodderDownloadService : DownloadService(
     FOREGROUND_NOTIFICATION_ID,
     DEFAULT_FOREGROUND_NOTIFICATION_UPDATE_INTERVAL,
     CHANNEL_ID,
-    /* channelNameResourceId= */ 0,
+    R.string.download_channel_name,
     /* channelDescriptionResourceId= */ 0,
 ) {
-    private val downloadManager: DownloadManager by inject()
+    private val injectedDownloadManager: DownloadManager by inject()
 
-    override fun getDownloadManager(): DownloadManager = downloadManager
+    override fun getDownloadManager(): DownloadManager = injectedDownloadManager
 
     override fun getScheduler(): Scheduler? = null
 

@@ -1,7 +1,20 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.0"
+}
+
+val localProperties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) load(f.inputStream())
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+    }
 }
 
 android {
@@ -14,6 +27,8 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+        buildConfigField("String", "PI_API_KEY",    "\"${localProperties["podcastindex.apiKey"] ?: ""}\"")
+        buildConfigField("String", "PI_API_SECRET", "\"${localProperties["podcastindex.apiSecret"] ?: ""}\"")
     }
 
     compileOptions {
@@ -21,12 +36,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     externalNativeBuild {
@@ -58,7 +70,10 @@ dependencies {
     implementation(libs.koin.compose)
 
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.work.runtime.ktx)
 
+    implementation(libs.kotlinx.serialization.json)
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.coil.compose)
 
     implementation("androidx.compose.material:material-icons-extended")

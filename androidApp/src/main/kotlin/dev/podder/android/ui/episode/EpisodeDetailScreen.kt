@@ -101,14 +101,36 @@ fun EpisodeDetailScreen(episodeId: String, onBack: () -> Unit) {
             // ── Seek bar ─────────────────────────────────────────────────────
             item {
                 Column(Modifier.padding(horizontal = 20.dp)) {
-                    val progress = if (durationMs > 0L) positionMs.toFloat() / durationMs.toFloat() else 0f
+                    var isScrubbing by remember { mutableStateOf(false) }
+                    var scrubFraction by remember { mutableStateOf(0f) }
+
+                    val liveProgress = if (durationMs > 0L) positionMs.toFloat() / durationMs.toFloat() else 0f
+                    val sliderValue = if (isScrubbing) scrubFraction else liveProgress
+                    val displayPositionMs = if (isScrubbing) (scrubFraction * durationMs).toLong() else positionMs
+
                     Slider(
-                        value         = progress,
-                        onValueChange = { fraction -> vm.seekTo((fraction * durationMs).toLong()) },
+                        value         = sliderValue,
+                        onValueChange = { fraction ->
+                            scrubFraction = fraction
+                            if (!isScrubbing) {
+                                isScrubbing = true
+                                vm.setScrubbing(true)
+                            }
+                        },
+                        onValueChangeFinished = {
+                            if (isScrubbing) {
+                                // Clamp 1 second from end to prevent seekTo(durationMs) → immediate STATE_ENDED
+                                val seekMs = (scrubFraction * durationMs).toLong()
+                                    .coerceIn(0L, (durationMs - 1_000L).coerceAtLeast(0L))
+                                vm.seekTo(seekMs)
+                                vm.setScrubbing(false)
+                                isScrubbing = false
+                            }
+                        },
                         modifier      = Modifier.fillMaxWidth(),
                     )
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(formatPlayerTime(positionMs), style = MaterialTheme.typography.bodySmall)
+                        Text(formatPlayerTime(displayPositionMs), style = MaterialTheme.typography.bodySmall)
                         Text(formatPlayerTime(durationMs), style = MaterialTheme.typography.bodySmall)
                     }
                 }

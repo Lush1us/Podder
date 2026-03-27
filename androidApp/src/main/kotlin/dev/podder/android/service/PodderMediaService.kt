@@ -6,13 +6,21 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import dev.podder.android.download.DownloadRepository
+import dev.podder.android.queue.QueueRepository
+import dev.podder.data.repository.PodcastRepository
 import dev.podder.domain.model.PlaybackState
 import dev.podder.domain.player.PlaybackStateMachine
+import dev.podder.logging.LogEvent
+import dev.podder.logging.LogLevel
+import dev.podder.logging.PodderLogger
+import dev.podder.logging.Subsystem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,16 +39,29 @@ class PodderMediaService : MediaSessionService() {
 
     private val stateMachine: PlaybackStateMachine by inject()
     private val cacheDataSourceFactory: CacheDataSource.Factory by inject()
+    private val simpleCache: SimpleCache by inject()
     private val downloadRepository: DownloadRepository by inject()
+    private val podcastRepository: PodcastRepository by inject()
+    private val queueRepository: QueueRepository by inject()
+    private val logger: PodderLogger by inject()
 
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var uiTickJob: Job? = null
     private var persistTickJob: Job? = null
+    // Track which episodeId has already been marked finished to avoid repeat DB writes
+    private var finishedMarkId: String? = null
+    // Guard against emit storm re-preparing the same URL multiple times
+    private var lastPreparedUrl: String? = null
+    // Player listener reference so we can remove it before release
+    private var playerListener: Player.Listener? = null
+    // Set during onDestroy to prevent listener callbacks from overwriting saved position
+    private var releasing = false
 
     override fun onCreate() {
         super.onCreate()
+        logger.log(LogLevel.INFO, Subsystem.APP, LogEvent.AppLifecycle.Created)
         player = ExoPlayer.Builder(this)
             .setAudioAttributes(
                 AudioAttributes.Builder()
@@ -49,23 +70,29 @@ class PodderMediaService : MediaSessionService() {
                     .build(), true
             )
             .setHandleAudioBecomingNoisy(true)
-            .setWakeMode(C.WAKE_MODE_LOCAL)
+            .setWakeMode(C.WAKE_MODE_NETWORK)
             .experimentalSetDynamicSchedulingEnabled(true)
             .setMediaSourceFactory(DefaultMediaSourceFactory(cacheDataSourceFactory))
             .build()
         mediaSession = MediaSession.Builder(this, player).build()
 
+        // Register session + notification so the OS treats this as a foreground media service.
+        // Without this, Pixel's power-saving monitor kills the service after ~1 minute.
+        addSession(mediaSession)
+        setMediaNotificationProvider(DefaultMediaNotificationProvider.Builder(this).build())
+
         observeStateMachine()
         observePlayer()
         observeSeek()
         observeSpeed()
-        observeScrubbing()
+
         observeResume()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
 
     override fun onDestroy() {
+        releasing = true
         val finalState = stateMachine.state.value
         val finalTrackId = when (finalState) {
             is PlaybackState.Playing -> finalState.trackId
@@ -77,7 +104,14 @@ class PodderMediaService : MediaSessionService() {
         }
         uiTickJob?.cancel()
         persistTickJob?.cancel()
+        // Cancel deferred persist writes on the state machine's scope so they don't
+        // overwrite the position we just saved.
+        stateMachine.cancelPendingPersists()
         scope.cancel()
+        // Remove player listener BEFORE release so release-triggered callbacks
+        // (onIsPlayingChanged etc.) can't overwrite the saved position.
+        playerListener?.let { player.removeListener(it) }
+        removeSession(mediaSession)
         mediaSession.release()
         player.release()
         super.onDestroy()
@@ -92,15 +126,28 @@ class PodderMediaService : MediaSessionService() {
                     when (val s = stateMachine.state.value) {
                         is PlaybackState.Buffering -> {
                             stateMachine.pendingPlay()?.let { (trackId, url, pos) ->
-                                val item = MediaItem.fromUri(url)
+                                // Guard: rapid Buffering→Idle cycles from a bad cache entry can
+                                // queue many emissions here; each re-reads state.value which is
+                                // now Buffering(newUrl). Skip prepare if we already prepared this
+                                // URL and ExoPlayer is still loading it (not STATE_IDLE).
+                                if (url == lastPreparedUrl && player.playbackState != androidx.media3.common.Player.STATE_IDLE) return@let
+                                lastPreparedUrl = url
+                                val item = MediaItem.Builder()
+                                    .setUri(url)
+                                    .setCustomCacheKey(trackId) // stable key independent of URL rotation
+                                    .build()
                                 player.setMediaItem(item, pos)
                                 player.prepare()
                                 player.play()
-                                downloadRepository.startAutoCache(trackId, url)
+                                // CacheDataSource writes to SimpleCache automatically during streaming;
+                                // no need to trigger a parallel DownloadManager download here.
                             }
                         }
                         is PlaybackState.Paused -> player.pause()
-                        is PlaybackState.Idle   -> player.stop()
+                        is PlaybackState.Idle   -> {
+                            lastPreparedUrl = null
+                            player.stop()
+                        }
                         else -> Unit
                     }
                 }
@@ -108,8 +155,11 @@ class PodderMediaService : MediaSessionService() {
     }
 
     private fun observePlayer() {
-        player.addListener(object : Player.Listener {
+        val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                // During onDestroy we already saved the correct position; ignore
+                // release-triggered callbacks that would overwrite it with garbage.
+                if (releasing) return
                 val current = stateMachine.state.value
                 val trackId = when (current) {
                     is PlaybackState.Buffering -> current.trackId
@@ -130,18 +180,80 @@ class PodderMediaService : MediaSessionService() {
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
+                if (releasing) return
                 if (playbackState == Player.STATE_ENDED) {
+                    val endedTrackId = when (val s = stateMachine.state.value) {
+                        is PlaybackState.Playing   -> s.trackId
+                        is PlaybackState.Paused    -> s.trackId
+                        is PlaybackState.Buffering -> s.trackId
+                        else -> null
+                    }
+                    // Guard: if ExoPlayer ended after playing < 2 s the cached content is bad/expired.
+                    // Stop cleanly but don't mark finished, remove from queue, or trigger autoplay.
+                    // Use currentPosition (not duration — duration returns TIME_UNSET at STATE_ENDED).
+                    val playedMs = player.currentPosition
+                    if (playedMs < 2_000L) {
+                        logger.log(LogLevel.WARN, Subsystem.PLAYBACK,
+                            LogEvent.Playback.Error(
+                                trackId = endedTrackId ?: "unknown",
+                                message = "Premature STATE_ENDED (pos=${playedMs}ms) — bad cache or expired URL",
+                            ))
+                        // Evict the corrupt cache entry so the next play fetches fresh from network.
+                        // Key matches customCacheKey set during prepare (= trackId = episodeId).
+                        val evictKey = endedTrackId
+                            ?: player.currentMediaItem?.localConfiguration?.uri?.toString()
+                        evictKey?.let { try { simpleCache.removeResource(it) } catch (_: Exception) { } }
+                        lastPreparedUrl = null
+                        stateMachine.onStopped()
+                        return
+                    }
+                    if (endedTrackId != null) {
+                        logger.log(LogLevel.INFO, Subsystem.PLAYBACK,
+                            LogEvent.Playback.EpisodeFinished(endedTrackId))
+                    }
                     stateMachine.onStopped()
+                    if (queueRepository.autoplay.value) {
+                        // Remove the just-finished episode from the queue (no-op if not queued).
+                        // We only peek at the next item — it stays in queue until it finishes too.
+                        if (endedTrackId != null) queueRepository.removeFromQueue(endedTrackId)
+                        val next = queueRepository.peekNext()
+                        if (next != null) {
+                            logger.log(LogLevel.INFO, Subsystem.PLAYBACK,
+                                LogEvent.Playback.AutoplayTriggered(
+                                    endedId = endedTrackId ?: "",
+                                    nextId  = next.episodeId,
+                                    source  = "queue",
+                                ))
+                            stateMachine.play(next.episodeId, next.url)
+                        } else if (endedTrackId != null) {
+                            // Queue empty — fall back to the next episode in the feed
+                            scope.launch {
+                                podcastRepository.nextEpisodeInFeed(endedTrackId)?.let { ep ->
+                                    logger.log(LogLevel.INFO, Subsystem.PLAYBACK,
+                                        LogEvent.Playback.AutoplayTriggered(
+                                            endedId = endedTrackId,
+                                            nextId  = ep.id,
+                                            source  = "feed",
+                                        ))
+                                    stateMachine.play(ep.id, ep.url)
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
             override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                if (releasing) return
                 val trackId = (stateMachine.state.value as? PlaybackState.Buffering)?.trackId
                     ?: (stateMachine.state.value as? PlaybackState.Playing)?.trackId
+                    ?: (stateMachine.state.value as? PlaybackState.Paused)?.trackId
                     ?: "unknown"
                 stateMachine.onError(trackId, error.message ?: "Unknown playback error")
             }
-        })
+        }
+        playerListener = listener
+        player.addListener(listener)
     }
 
     private fun observeSeek() {
@@ -164,13 +276,6 @@ class PodderMediaService : MediaSessionService() {
         }
     }
 
-    private fun observeScrubbing() {
-        scope.launch {
-            stateMachine.scrubbing.collect { enabled ->
-                player.setScrubbingModeEnabled(enabled)
-            }
-        }
-    }
 
     private fun observeResume() {
         scope.launch {
@@ -191,6 +296,15 @@ class PodderMediaService : MediaSessionService() {
                 delay(1_000)
                 if (player.isPlaying) {
                     stateMachine.onPositionUpdateUi(trackId, player.currentPosition)
+                    // Mark episode finished when ≤15 s remain (once per episode)
+                    val dur = player.duration
+                    if (dur > 0L && player.currentPosition >= dur - 15_000L && finishedMarkId != trackId) {
+                        finishedMarkId = trackId
+                        podcastRepository.markEpisodeFinished(trackId)
+                        // Remove from queue now — STATE_ENDED handler will also call this
+                        // (idempotent) but this path handles the normal case first.
+                        queueRepository.removeFromQueue(trackId)
+                    }
                 }
             }
         }

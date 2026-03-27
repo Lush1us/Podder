@@ -3,6 +3,7 @@ package dev.podder.android.ui.playback
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -14,6 +15,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -73,11 +76,28 @@ fun MiniPlayerBar(
         exit    = slideOutVertically(targetOffsetY = { it }),
         modifier = modifier,
     ) {
+        Column(modifier = Modifier.navigationBarsPadding()) {
+        val positionMs = if (scrollMode) scrollSeekPositionMs else when (val s = state) {
+            is PlaybackState.Playing -> s.positionMs
+            is PlaybackState.Paused  -> s.positionMs
+            else -> 0L
+        }
+        val durationMs = info?.durationMs ?: 0L
+        val progress = if (durationMs > 0L) positionMs.toFloat() / durationMs.toFloat() else 0f
+        val barColor   = MaterialTheme.colorScheme.primary
+        val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+        Canvas(modifier = Modifier.fillMaxWidth().height(6.dp)) {
+            val barHeightPx = 4.dp.toPx()
+            val overPx      = 1.dp.toPx()
+            drawRect(color = trackColor, topLeft = Offset(0f, overPx), size = Size(size.width, barHeightPx))
+            drawRect(color = barColor, topLeft = Offset(0f, overPx), size = Size(size.width * progress, barHeightPx))
+            val markerX = size.width * progress
+            drawLine(color = barColor, start = Offset(markerX, 0f), end = Offset(markerX, overPx + barHeightPx + overPx), strokeWidth = 2.dp.toPx())
+        }
         Surface(
             tonalElevation  = 4.dp,
             shadowElevation = 4.dp,
             modifier = Modifier
-                .navigationBarsPadding()
                 .pointerInput(Unit) {
                     val viewConfig = viewConfiguration
                     awaitEachGesture {
@@ -154,47 +174,53 @@ fun MiniPlayerBar(
                                 scrollSeekPositionMs = currentPos
 
                                 val tapXDp         = with(density) { down.position.x.toDp().value }
-                                val maxLeftDragDp  = tapXDp.coerceAtLeast(1f)
-                                val maxRightDragDp = (screenWidthDp.toFloat() - tapXDp).coerceAtLeast(1f)
+                                val marginDp       = screenWidthDp * 0.05f
+                                val maxLeftDragDp  = (tapXDp - marginDp).coerceAtLeast(1f)
+                                val maxRightDragDp = (screenWidthDp - marginDp - tapXDp).coerceAtLeast(1f)
                                 val entryElapsedMs   = currentPos
                                 val entryRemainingMs = ((info?.durationMs ?: 0L) - currentPos).coerceAtLeast(1L)
                                 var cumulativeDragDp = 0f
 
-                                // Track horizontal drag until finger lifts
-                                while (true) {
-                                    val event  = awaitPointerEvent()
-                                    val change = event.changes.firstOrNull() ?: break
-                                    if (!change.pressed) break
+                                try {
+                                    // Track horizontal drag until finger lifts
+                                    while (true) {
+                                        val event  = awaitPointerEvent()
+                                        val change = event.changes.firstOrNull() ?: break
+                                        if (!change.pressed) break
 
-                                    change.consume()
+                                        change.consume()
 
-                                    val dpDelta = with(density) { (change.position - change.previousPosition).x.toDp().value }
-                                    cumulativeDragDp += dpDelta
-                                    scrollSeekPositionMs = if (cumulativeDragDp <= 0f) {
-                                        val t = (-cumulativeDragDp / maxLeftDragDp).coerceIn(0f, 1f)
-                                        baseSeekPositionMs - (entryElapsedMs * t.toDouble().pow(SCRUB_CURVE_EXPONENT)).toLong()
-                                    } else {
-                                        val t = (cumulativeDragDp / maxRightDragDp).coerceIn(0f, 1f)
-                                        baseSeekPositionMs + (entryRemainingMs * t.toDouble().pow(SCRUB_CURVE_EXPONENT)).toLong()
-                                    }
-                                    vm.seekTo(scrollSeekPositionMs)
+                                        val dpDelta = with(density) { (change.position - change.previousPosition).x.toDp().value }
+                                        cumulativeDragDp += dpDelta
+                                        scrollSeekPositionMs = if (cumulativeDragDp <= 0f) {
+                                            val t = (-cumulativeDragDp / maxLeftDragDp).coerceIn(0f, 1f)
+                                            baseSeekPositionMs - (entryElapsedMs * t.toDouble().pow(SCRUB_CURVE_EXPONENT)).toLong()
+                                        } else {
+                                            val t = (cumulativeDragDp / maxRightDragDp).coerceIn(0f, 1f)
+                                            baseSeekPositionMs + (entryRemainingMs * t.toDouble().pow(SCRUB_CURVE_EXPONENT)).toLong()
+                                        }
+                                        vm.seekTo(scrollSeekPositionMs)
 
-                                    // Restart the stop-resume timer on each movement
-                                    stopResumeJobRef.job?.cancel()
-                                    stopResumeJobRef.job = scope.launch {
-                                        delay(STOP_RESUME_DELAY_MS)
-                                        if (scrollMode) {
-                                            vm.resume()
+                                        // Restart the stop-resume timer on each movement
+                                        stopResumeJobRef.job?.cancel()
+                                        stopResumeJobRef.job = scope.launch {
+                                            delay(STOP_RESUME_DELAY_MS)
+                                            if (scrollMode) {
+                                                vm.resume()
+                                            }
                                         }
                                     }
-                                }
 
-                                // Finger lifted — commit seek and restore playback
-                                stopResumeJobRef.job?.cancel()
-                                vm.setScrubbing(false)
-                                vm.seekTo(scrollSeekPositionMs)
-                                if (wasPlayingBeforeScroll) vm.resume()
-                                scrollMode = false
+                                    // Finger lifted normally — commit final seek and restore playback
+                                    vm.seekTo(scrollSeekPositionMs)
+                                    if (wasPlayingBeforeScroll) vm.resume()
+                                } finally {
+                                    // Always clean up scrub state, even if the gesture coroutine
+                                    // is cancelled (e.g. player died mid-scrub → composable removed).
+                                    stopResumeJobRef.job?.cancel()
+                                    vm.setScrubbing(false)
+                                    scrollMode = false
+                                }
                             }
 
                             // else: aborted (diagonal/horizontal movement before long press) — do nothing
@@ -290,23 +316,6 @@ fun MiniPlayerBar(
                     }
                 }
 
-                // ── Progress bar — top edge, 95% width, 2dp tall ──────────────
-                val positionMs = if (scrollMode) scrollSeekPositionMs else when (val s = state) {
-                    is PlaybackState.Playing -> s.positionMs
-                    is PlaybackState.Paused  -> s.positionMs
-                    else -> 0L
-                }
-                val durationMs = info?.durationMs ?: 0L
-                val progress = if (durationMs > 0L) positionMs.toFloat() / durationMs.toFloat() else 0f
-
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth(0.95f)
-                        .height(2.dp)
-                        .align(Alignment.TopCenter),
-                )
-
                 // ── Scroll mode overlay indicator ─────────────────────────────
                 if (scrollMode) {
                     Surface(
@@ -327,6 +336,7 @@ fun MiniPlayerBar(
                 }
             }
         }
+        } // Column
     }
 }
 

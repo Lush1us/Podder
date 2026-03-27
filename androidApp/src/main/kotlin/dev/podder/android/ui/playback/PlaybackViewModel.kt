@@ -62,6 +62,8 @@ class PlaybackViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    fun resumePosition(episodeId: String): Long = stateMachine.resumePosition(episodeId)
+
     fun play(trackId: String, url: String) = stateMachine.play(trackId, url)
     fun pause()  = stateMachine.pause()
     fun resume() = stateMachine.resume()

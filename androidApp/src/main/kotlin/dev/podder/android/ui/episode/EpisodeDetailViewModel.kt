@@ -55,6 +55,7 @@ class EpisodeDetailViewModel(
     fun resume() = stateMachine.resume()
 
     fun seekTo(positionMs: Long) = stateMachine.seekTo(positionMs)
+    fun setScrubbing(enabled: Boolean) = stateMachine.setScrubbing(enabled)
 
     fun setSpeed(speed: Float) {
         _speed.value = speed
