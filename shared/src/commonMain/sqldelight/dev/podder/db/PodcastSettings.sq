@@ -1,0 +1,22 @@
+CREATE TABLE PodcastSettings (
+    podcastId          TEXT NOT NULL PRIMARY KEY,
+    playbackSpeed      REAL,
+    notificationsMuted INTEGER NOT NULL DEFAULT 0,
+    autoDownload       TEXT NOT NULL DEFAULT 'global',
+    skipIntroDurationS INTEGER NOT NULL DEFAULT 0,
+    skipOutroDurationS INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (podcastId) REFERENCES Podcasts(id) ON DELETE CASCADE
+);
+
+selectByPodcastId:
+SELECT * FROM PodcastSettings WHERE podcastId = ?;
+
+upsert:
+INSERT OR REPLACE INTO PodcastSettings (podcastId, playbackSpeed, notificationsMuted, autoDownload, skipIntroDurationS, skipOutroDurationS)
+VALUES (?, ?, ?, ?, ?, ?);
+
+deleteByPodcastId:
+DELETE FROM PodcastSettings WHERE podcastId = ?;
+
+selectMutedPodcastIds:
+SELECT podcastId FROM PodcastSettings WHERE notificationsMuted = 1;

@@ -1,4 +1,4 @@
-package dev.podder.android.ui.playback
+package com.lush1us.podder.ui.playback
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -61,6 +61,8 @@ class PlaybackViewModel(
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun resumePosition(episodeId: String): Long = stateMachine.resumePosition(episodeId)
 
     fun play(trackId: String, url: String) = stateMachine.play(trackId, url)
     fun pause()  = stateMachine.pause()

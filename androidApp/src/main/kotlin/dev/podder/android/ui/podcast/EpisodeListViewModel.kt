@@ -1,4 +1,4 @@
-package dev.podder.android.ui.podcast
+package com.lush1us.podder.ui.podcast
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,7 @@ import dev.podder.data.repository.EpisodeSummary
 import dev.podder.data.repository.PodcastRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -17,4 +18,8 @@ class EpisodeListViewModel(
     val episodes: StateFlow<List<EpisodeSummary>> = repository
         .episodes(podcastId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val podcastTitle: StateFlow<String> = flow {
+        emit(repository.podcastById(podcastId)?.title ?: "")
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 }

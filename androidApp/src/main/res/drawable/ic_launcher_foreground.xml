@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Three audio bars — simple waveform mark for a podcast app -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- left bar -->
+    <path
+        android:fillColor="#D0BCFF"
+        android:pathData="M34,46 Q34,44 36,44 L42,44 Q44,44 44,46 L44,62 Q44,64 42,64 L36,64 Q34,64 34,62 Z"/>
+    <!-- centre bar (taller) -->
+    <path
+        android:fillColor="#D0BCFF"
+        android:pathData="M50,37 Q50,35 52,35 L56,35 Q58,35 58,37 L58,71 Q58,73 56,73 L52,73 Q50,73 50,71 Z"/>
+    <!-- right bar -->
+    <path
+        android:fillColor="#D0BCFF"
+        android:pathData="M64,46 Q64,44 66,44 L72,44 Q74,44 74,46 L74,62 Q74,64 72,64 L66,64 Q64,64 64,62 Z"/>
+</vector>

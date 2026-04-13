@@ -23,10 +23,12 @@ SELECT * FROM Episodes WHERE id = ? LIMIT 1;
 selectAllNewestFirst:
 SELECT Episodes.id, Episodes.podcastId, Episodes.title, Episodes.url,
        Episodes.durationMs, Episodes.playCount, Episodes.isDownloaded,
-       Episodes.publicationDateUtc, Episodes.description, Podcasts.title AS podcastTitle
+       Episodes.publicationDateUtc, Episodes.description,
+       Podcasts.title AS podcastTitle, Podcasts.artworkUrl AS artworkUrl
 FROM Episodes
 JOIN Podcasts ON Episodes.podcastId = Podcasts.id
-ORDER BY Episodes.publicationDateUtc DESC;
+ORDER BY Episodes.publicationDateUtc DESC
+LIMIT :limit;
 
 selectUnplayedDownloaded:
 SELECT Episodes.*, Podcasts.priority
@@ -37,7 +39,7 @@ WHERE Episodes.playCount = 0
 ORDER BY Podcasts.priority DESC, Episodes.publicationDateUtc ASC;
 
 insert:
-INSERT OR REPLACE INTO Episodes(id, podcastId, title, url, durationMs, playCount, isDownloaded, publicationDateUtc, description)
+INSERT OR IGNORE INTO Episodes(id, podcastId, title, url, durationMs, playCount, isDownloaded, publicationDateUtc, description)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 incrementPlayCount:

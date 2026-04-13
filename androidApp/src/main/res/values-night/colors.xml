@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark-mode splash background — Material3 baseline dark surface -->
+    <color name="splash_background">#1C1B1F</color>
+</resources>

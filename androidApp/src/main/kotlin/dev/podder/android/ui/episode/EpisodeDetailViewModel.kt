@@ -1,4 +1,4 @@
-package dev.podder.android.ui.episode
+package com.lush1us.podder.ui.episode
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -55,6 +55,7 @@ class EpisodeDetailViewModel(
     fun resume() = stateMachine.resume()
 
     fun seekTo(positionMs: Long) = stateMachine.seekTo(positionMs)
+    fun setScrubbing(enabled: Boolean) = stateMachine.setScrubbing(enabled)
 
     fun setSpeed(speed: Float) {
         _speed.value = speed

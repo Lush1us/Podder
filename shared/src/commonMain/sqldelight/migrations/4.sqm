@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS Queue (
+    episodeId    TEXT    NOT NULL PRIMARY KEY,
+    position     INTEGER NOT NULL,
+    url          TEXT    NOT NULL,
+    title        TEXT    NOT NULL,
+    artworkUrl   TEXT,
+    podcastTitle TEXT    NOT NULL,
+    durationMs   INTEGER NOT NULL
+);

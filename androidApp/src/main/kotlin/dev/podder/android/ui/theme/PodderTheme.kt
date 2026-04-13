@@ -1,4 +1,4 @@
-package dev.podder.android.ui.theme
+package com.lush1us.podder.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -12,9 +12,14 @@ import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun PodderTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: String = "system",
     content: @Composable () -> Unit,
 ) {
+    val darkTheme = when (themeMode) {
+        "light" -> false
+        "dark"  -> true
+        else    -> isSystemInDarkTheme()
+    }
     val colorScheme = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current

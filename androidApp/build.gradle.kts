@@ -1,19 +1,43 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.0"
+}
+
+val localProperties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) load(f.inputStream())
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+    }
 }
 
 android {
-    namespace = "dev.podder.android"
+    namespace = "com.lush1us.podder"
     compileSdk = 35
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(localProperties["signing.storeFile"] as String)
+            storePassword = localProperties["signing.storePassword"] as String
+            keyAlias = localProperties["signing.keyAlias"] as String
+            keyPassword = localProperties["signing.keyPassword"] as String
+        }
+    }
+
     defaultConfig {
-        applicationId = "dev.podder.android"
+        applicationId = "com.lush1us.podder"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+        buildConfigField("String", "PI_API_KEY",    "\"${localProperties["podcastindex.apiKey"] ?: ""}\"")
+        buildConfigField("String", "PI_API_SECRET", "\"${localProperties["podcastindex.apiSecret"] ?: ""}\"")
     }
 
     compileOptions {
@@ -21,12 +45,16 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = "1.8"
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+        }
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     externalNativeBuild {
@@ -52,11 +80,16 @@ dependencies {
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.session)
     implementation(libs.media3.exoplayer.hls)
+    implementation(libs.media3.datasource)
+    implementation(libs.media3.database)
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
 
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.work.runtime.ktx)
 
+    implementation(libs.kotlinx.serialization.json)
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.coil.compose)
 
     implementation("androidx.compose.material:material-icons-extended")

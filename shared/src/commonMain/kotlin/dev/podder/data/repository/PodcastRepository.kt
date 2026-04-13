@@ -8,8 +8,8 @@ interface PodcastRepository {
     /** Subscribe to a podcast by its RSS URL. Fetches and stores feed + episodes. */
     suspend fun subscribeToPodcast(rssUrl: String)
 
-    /** Refresh episodes for all subscribed podcasts. */
-    suspend fun refreshAll()
+    /** Refresh episodes for all subscribed podcasts. Returns newly discovered episodes. */
+    suspend fun refreshAll(): List<RefreshedEpisode>
 
     /** Flow of all subscribed podcasts as simple data holders. */
     fun podcasts(): Flow<List<PodcastSummary>>
@@ -20,14 +20,21 @@ interface PodcastRepository {
     /** Import subscriptions from an OPML file's text content. Skips already-subscribed feeds. */
     suspend fun importFromOpml(opmlContent: String)
 
-    /** Flow of all episodes across all subscribed podcasts, newest first. */
-    fun allEpisodes(): Flow<List<FeedEpisode>>
+    /** Flow of all episodes across all subscribed podcasts, newest first, up to [limit]. */
+    fun allEpisodes(limit: Long = 100L): Flow<List<FeedEpisode>>
 
     /** One-shot fetch of a single episode by id, or null if not found. */
     suspend fun episodeById(id: String): EpisodeSummary?
 
     /** One-shot fetch of a single podcast by id, or null if not found. */
     suspend fun podcastById(id: String): PodcastSummary?
+
+    /** Increment playCount for an episode (called when ≤15 s remain). */
+    suspend fun markEpisodeFinished(episodeId: String)
+
+    /** Return the episode immediately after [currentEpisodeId] in feed order (newest-first),
+     *  or null if [currentEpisodeId] is the last episode or not found. */
+    suspend fun nextEpisodeInFeed(currentEpisodeId: String): FeedEpisode?
 }
 
 data class PodcastSummary(
@@ -54,10 +61,20 @@ data class FeedEpisode(
     val id: String,
     val podcastId: String,
     val podcastTitle: String,
+    val artworkUrl: String?,
     val title: String,
     val url: String,
     val durationMs: Long,
     val playCount: Int,
     val publicationDateUtc: Long,
     val description: String,
+    val isDownloaded: Boolean = false,
+)
+
+data class RefreshedEpisode(
+    val episodeId: String,
+    val title: String,
+    val podcastId: String,
+    val podcastTitle: String,
+    val isNew: Boolean,
 )

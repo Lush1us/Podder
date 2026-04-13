@@ -64,6 +64,11 @@ CMakeCache.txt
 !CMakeLists.txt
 /androidApp/.cxx/
 
+# ─── Brain / iarvis node files ────────────────────────────────────────────────
+*.node.md
+**/*.node.md
+*.txt.node.md
+
 # ─── Secrets / environment ────────────────────────────────────────────────────
 *.env
 *.env.*

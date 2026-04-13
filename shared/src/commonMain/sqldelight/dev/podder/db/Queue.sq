@@ -1,0 +1,19 @@
+CREATE TABLE Queue (
+    episodeId    TEXT    NOT NULL PRIMARY KEY,
+    position     INTEGER NOT NULL,
+    url          TEXT    NOT NULL,
+    title        TEXT    NOT NULL,
+    artworkUrl   TEXT,
+    podcastTitle TEXT    NOT NULL,
+    durationMs   INTEGER NOT NULL
+);
+
+selectAllOrdered:
+SELECT * FROM Queue ORDER BY position ASC;
+
+insert:
+INSERT OR REPLACE INTO Queue(episodeId, position, url, title, artworkUrl, podcastTitle, durationMs)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+deleteAll:
+DELETE FROM Queue;

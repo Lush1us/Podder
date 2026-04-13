@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS Downloads (
+    episodeId   TEXT    NOT NULL PRIMARY KEY,
+    url         TEXT    NOT NULL,
+    isAutoCache INTEGER NOT NULL DEFAULT 0,
+    startedAt   INTEGER NOT NULL,
+    expiresAt   INTEGER
+);

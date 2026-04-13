@@ -1,0 +1,26 @@
+CREATE TABLE Downloads (
+    episodeId   TEXT    NOT NULL PRIMARY KEY,
+    url         TEXT    NOT NULL,
+    isAutoCache INTEGER NOT NULL DEFAULT 0,  -- 0 = manual, 1 = auto-cache
+    startedAt   INTEGER NOT NULL,
+    expiresAt   INTEGER                      -- NULL = permanent (manual); ms timestamp for auto-cache
+);
+
+insertOrReplace:
+INSERT OR REPLACE INTO Downloads(episodeId, url, isAutoCache, startedAt, expiresAt)
+VALUES (?, ?, ?, ?, ?);
+
+deleteByEpisodeId:
+DELETE FROM Downloads WHERE episodeId = ?;
+
+selectAll:
+SELECT * FROM Downloads ORDER BY startedAt DESC;
+
+selectExpired:
+SELECT * FROM Downloads
+WHERE isAutoCache = 1
+  AND expiresAt IS NOT NULL
+  AND expiresAt < ?;
+
+selectByEpisodeId:
+SELECT * FROM Downloads WHERE episodeId = ? LIMIT 1;
