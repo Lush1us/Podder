@@ -1,4 +1,4 @@
-package dev.podder.android.queue
+package com.lush1us.podder.queue
 
 import dev.podder.db.PodderDatabase
 import dev.podder.logging.LogEvent

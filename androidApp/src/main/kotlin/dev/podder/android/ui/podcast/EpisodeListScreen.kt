@@ -1,4 +1,4 @@
-package dev.podder.android.ui.podcast
+package com.lush1us.podder.ui.podcast
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -13,10 +13,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import dev.podder.android.download.DownloadProgress
-import dev.podder.android.ui.download.DownloadActionButton
-import dev.podder.android.ui.download.DownloadViewModel
-import dev.podder.android.ui.playback.PlaybackViewModel
+import com.lush1us.podder.download.DownloadProgress
+import com.lush1us.podder.ui.download.DownloadActionButton
+import com.lush1us.podder.ui.download.DownloadViewModel
+import com.lush1us.podder.ui.playback.PlaybackViewModel
 import dev.podder.data.repository.EpisodeSummary
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf

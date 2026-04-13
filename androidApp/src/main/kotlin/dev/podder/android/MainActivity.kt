@@ -1,4 +1,4 @@
-package dev.podder.android
+package com.lush1us.podder
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,9 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import dev.podder.android.service.PodderMediaService
-import dev.podder.android.ui.HomeScreen
-import dev.podder.android.ui.theme.PodderTheme
+import com.lush1us.podder.service.PodderMediaService
+import com.lush1us.podder.ui.HomeScreen
+import com.lush1us.podder.ui.theme.PodderTheme
 import dev.podder.data.store.KVStore
 import org.koin.android.ext.android.inject
 

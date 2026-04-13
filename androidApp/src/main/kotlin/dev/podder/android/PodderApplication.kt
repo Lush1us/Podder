@@ -1,4 +1,4 @@
-package dev.podder.android
+package com.lush1us.podder
 
 import android.app.Application
 import android.app.NotificationChannel
@@ -9,17 +9,17 @@ import android.content.res.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import dev.podder.android.notification.NewEpisodeNotifier
-import dev.podder.android.di.appModule
-import dev.podder.android.download.DownloadRepository
+import com.lush1us.podder.notification.NewEpisodeNotifier
+import com.lush1us.podder.di.appModule
+import com.lush1us.podder.download.DownloadRepository
 import dev.podder.data.store.KVStore
-import dev.podder.android.logging.AnrWatchdog
-import dev.podder.android.logging.AppPodderLogger
-import dev.podder.android.logging.ContextualExceptionHandler
-import dev.podder.android.logging.CrashContextHarvester
-import dev.podder.android.logging.CrashUploader
-import dev.podder.android.logging.JankMonitor
-import dev.podder.android.worker.RefreshWorker
+import com.lush1us.podder.logging.AnrWatchdog
+import com.lush1us.podder.logging.AppPodderLogger
+import com.lush1us.podder.logging.ContextualExceptionHandler
+import com.lush1us.podder.logging.CrashContextHarvester
+import com.lush1us.podder.logging.CrashUploader
+import com.lush1us.podder.logging.JankMonitor
+import com.lush1us.podder.worker.RefreshWorker
 import dev.podder.data.db.DatabaseDriverFactory
 import dev.podder.di.sharedModule
 import dev.podder.domain.player.PlaybackStateMachine

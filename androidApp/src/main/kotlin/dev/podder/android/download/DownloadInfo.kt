@@ -1,4 +1,4 @@
-package dev.podder.android.download
+package com.lush1us.podder.download
 
 data class DownloadInfo(
     val episodeId: String,

@@ -1,4 +1,4 @@
-package dev.podder.android.ui.settings
+package com.lush1us.podder.ui.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts

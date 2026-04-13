@@ -1,4 +1,4 @@
-package dev.podder.android.ui.screens
+package com.lush1us.podder.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,8 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import dev.podder.android.ui.download.DownloadViewModel
-import dev.podder.android.download.DownloadInfo
+import com.lush1us.podder.ui.download.DownloadViewModel
+import com.lush1us.podder.download.DownloadInfo
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

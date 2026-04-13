@@ -1,4 +1,4 @@
-package dev.podder.android.ui.nav
+package com.lush1us.podder.ui.nav
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home

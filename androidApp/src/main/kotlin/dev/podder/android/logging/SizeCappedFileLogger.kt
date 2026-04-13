@@ -1,4 +1,4 @@
-package dev.podder.android.logging
+package com.lush1us.podder.logging
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex

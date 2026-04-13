@@ -1,4 +1,4 @@
-package dev.podder.android.ui.podcast
+package com.lush1us.podder.ui.podcast
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row

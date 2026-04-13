@@ -1,11 +1,11 @@
-package dev.podder.android.worker
+package com.lush1us.podder.worker
 
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import dev.podder.android.notification.NewEpisodeInfo
-import dev.podder.android.notification.NewEpisodeNotifier
-import dev.podder.android.precache.PreCacheManager
+import com.lush1us.podder.notification.NewEpisodeInfo
+import com.lush1us.podder.notification.NewEpisodeNotifier
+import com.lush1us.podder.precache.PreCacheManager
 import dev.podder.data.repository.PodcastRepository
 import dev.podder.logging.LogEvent
 import dev.podder.logging.LogLevel

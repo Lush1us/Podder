@@ -18,11 +18,20 @@ kotlin {
 }
 
 android {
-    namespace = "dev.podder.android"
+    namespace = "com.lush1us.podder"
     compileSdk = 35
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(localProperties["signing.storeFile"] as String)
+            storePassword = localProperties["signing.storePassword"] as String
+            keyAlias = localProperties["signing.keyAlias"] as String
+            keyPassword = localProperties["signing.keyPassword"] as String
+        }
+    }
+
     defaultConfig {
-        applicationId = "dev.podder.android"
+        applicationId = "com.lush1us.podder"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -34,6 +43,13 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+        }
     }
 
     buildFeatures {

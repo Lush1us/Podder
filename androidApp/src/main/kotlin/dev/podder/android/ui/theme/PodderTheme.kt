@@ -1,4 +1,4 @@
-package dev.podder.android.ui.theme
+package com.lush1us.podder.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

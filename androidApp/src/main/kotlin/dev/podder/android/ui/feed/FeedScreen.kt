@@ -1,4 +1,4 @@
-package dev.podder.android.ui.feed
+package com.lush1us.podder.ui.feed
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,12 +47,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import dev.podder.android.download.DownloadProgress
-import dev.podder.android.queue.QueueEntry
-import dev.podder.android.ui.download.DownloadViewModel
-import dev.podder.android.ui.playback.PlaybackViewModel
-import dev.podder.android.ui.podcast.PodcastListViewModel
-import dev.podder.android.ui.queue.QueueViewModel
+import com.lush1us.podder.download.DownloadProgress
+import com.lush1us.podder.queue.QueueEntry
+import com.lush1us.podder.ui.download.DownloadViewModel
+import com.lush1us.podder.ui.playback.PlaybackViewModel
+import com.lush1us.podder.ui.podcast.PodcastListViewModel
+import com.lush1us.podder.ui.queue.QueueViewModel
 import dev.podder.data.repository.FeedEpisode
 import dev.podder.domain.model.DownloadFilter
 import dev.podder.domain.model.FeedFilter

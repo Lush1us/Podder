@@ -1,7 +1,7 @@
-package dev.podder.android.service
+package com.lush1us.podder.service
 
 import android.app.Notification
-import dev.podder.android.R
+import com.lush1us.podder.R
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper

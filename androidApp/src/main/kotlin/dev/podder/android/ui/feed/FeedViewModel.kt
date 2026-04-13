@@ -1,8 +1,8 @@
-package dev.podder.android.ui.feed
+package com.lush1us.podder.ui.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.podder.android.precache.PreCacheManager
+import com.lush1us.podder.precache.PreCacheManager
 import dev.podder.data.repository.FeedEpisode
 import dev.podder.data.repository.PodcastRepository
 import dev.podder.domain.model.DownloadFilter

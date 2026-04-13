@@ -1,4 +1,4 @@
-package dev.podder.android.ui.discover
+package com.lush1us.podder.ui.discover
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

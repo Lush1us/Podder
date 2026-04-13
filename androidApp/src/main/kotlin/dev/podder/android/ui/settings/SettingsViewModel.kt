@@ -1,4 +1,4 @@
-package dev.podder.android.ui.settings
+package com.lush1us.podder.ui.settings
 
 import androidx.lifecycle.ViewModel
 import dev.podder.data.repository.PodcastRepository

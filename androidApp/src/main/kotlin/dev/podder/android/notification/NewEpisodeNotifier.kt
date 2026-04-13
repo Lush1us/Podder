@@ -1,12 +1,12 @@
-package dev.podder.android.notification
+package com.lush1us.podder.notification
 
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import dev.podder.android.MainActivity
-import dev.podder.android.R
+import com.lush1us.podder.MainActivity
+import com.lush1us.podder.R
 import dev.podder.db.PodderDatabase
 
 data class NewEpisodeInfo(

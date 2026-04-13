@@ -1,4 +1,4 @@
-package dev.podder.android.ui
+package com.lush1us.podder.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
@@ -15,15 +15,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import dev.podder.android.ui.episode.EpisodeDetailScreen
-import dev.podder.android.ui.feed.FeedScreen
-import dev.podder.android.ui.playback.MiniPlayerBar
-import dev.podder.android.ui.podcast.EpisodeListScreen
-import dev.podder.android.ui.queue.QueueScreen
-import dev.podder.android.ui.queue.QueueViewModel
-import dev.podder.android.ui.discover.DiscoverScreen
-import dev.podder.android.ui.screens.DownloadsScreen
-import dev.podder.android.ui.settings.SettingsScreen
+import com.lush1us.podder.ui.episode.EpisodeDetailScreen
+import com.lush1us.podder.ui.feed.FeedScreen
+import com.lush1us.podder.ui.playback.MiniPlayerBar
+import com.lush1us.podder.ui.podcast.EpisodeListScreen
+import com.lush1us.podder.ui.queue.QueueScreen
+import com.lush1us.podder.ui.queue.QueueViewModel
+import com.lush1us.podder.ui.discover.DiscoverScreen
+import com.lush1us.podder.ui.screens.DownloadsScreen
+import com.lush1us.podder.ui.settings.SettingsScreen
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,10 +1,10 @@
-package dev.podder.android.ui.download
+package com.lush1us.podder.ui.download
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.podder.android.download.DownloadInfo
-import dev.podder.android.download.DownloadProgress
-import dev.podder.android.download.DownloadRepository
+import com.lush1us.podder.download.DownloadInfo
+import com.lush1us.podder.download.DownloadProgress
+import com.lush1us.podder.download.DownloadRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map

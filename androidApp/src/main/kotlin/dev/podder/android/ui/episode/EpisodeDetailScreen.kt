@@ -1,4 +1,4 @@
-package dev.podder.android.ui.episode
+package com.lush1us.podder.ui.episode
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,7 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import dev.podder.android.ui.playback.formatPlayerTime
+import com.lush1us.podder.ui.playback.formatPlayerTime
 import dev.podder.domain.model.PlaybackState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf

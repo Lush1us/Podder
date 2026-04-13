@@ -1,4 +1,4 @@
-package dev.podder.android.ui.playback
+package com.lush1us.podder.ui.playback
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

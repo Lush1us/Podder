@@ -1,4 +1,4 @@
-package dev.podder.android.ui.playback
+package com.lush1us.podder.ui.playback
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically

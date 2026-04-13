@@ -1,4 +1,4 @@
-package dev.podder.android.ui.search
+package com.lush1us.podder.ui.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

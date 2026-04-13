@@ -1,4 +1,4 @@
-package dev.podder.android.download
+package com.lush1us.podder.download
 
 import android.content.Context
 import androidx.media3.exoplayer.offline.Download
@@ -6,7 +6,7 @@ import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import android.net.Uri
-import dev.podder.android.service.PodderDownloadService
+import com.lush1us.podder.service.PodderDownloadService
 import dev.podder.db.PodderDatabase
 import dev.podder.data.repository.PodcastRepository
 import dev.podder.logging.LogEvent

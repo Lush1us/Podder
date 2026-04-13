@@ -1,4 +1,4 @@
-package dev.podder.android.logging
+package com.lush1us.podder.logging
 
 /**
  * Delegating UncaughtExceptionHandler.

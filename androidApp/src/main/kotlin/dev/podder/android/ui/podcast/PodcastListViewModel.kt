@@ -1,8 +1,8 @@
-package dev.podder.android.ui.podcast
+package com.lush1us.podder.ui.podcast
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.podder.android.precache.PreCacheManager
+import com.lush1us.podder.precache.PreCacheManager
 import dev.podder.data.repository.PodcastRepository
 import dev.podder.data.repository.PodcastSummary
 import kotlinx.coroutines.flow.MutableStateFlow

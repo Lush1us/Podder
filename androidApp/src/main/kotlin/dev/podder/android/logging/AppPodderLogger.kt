@@ -1,4 +1,4 @@
-package dev.podder.android.logging
+package com.lush1us.podder.logging
 
 import dev.podder.logging.LogEvent
 import dev.podder.logging.LogLevel

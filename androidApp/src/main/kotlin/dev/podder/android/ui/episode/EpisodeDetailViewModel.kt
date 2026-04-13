@@ -1,4 +1,4 @@
-package dev.podder.android.ui.episode
+package com.lush1us.podder.ui.episode
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

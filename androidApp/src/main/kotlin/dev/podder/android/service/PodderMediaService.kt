@@ -1,4 +1,4 @@
-package dev.podder.android.service
+package com.lush1us.podder.service
 
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -12,8 +12,8 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import dev.podder.android.download.DownloadRepository
-import dev.podder.android.queue.QueueRepository
+import com.lush1us.podder.download.DownloadRepository
+import com.lush1us.podder.queue.QueueRepository
 import dev.podder.data.repository.PodcastRepository
 import dev.podder.domain.model.PlaybackState
 import dev.podder.domain.player.PlaybackStateMachine

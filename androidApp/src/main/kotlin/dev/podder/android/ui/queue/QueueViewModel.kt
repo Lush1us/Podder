@@ -1,8 +1,8 @@
-package dev.podder.android.ui.queue
+package com.lush1us.podder.ui.queue
 
 import androidx.lifecycle.ViewModel
-import dev.podder.android.queue.QueueEntry
-import dev.podder.android.queue.QueueRepository
+import com.lush1us.podder.queue.QueueEntry
+import com.lush1us.podder.queue.QueueRepository
 import kotlinx.coroutines.flow.StateFlow
 
 class QueueViewModel(

@@ -1,4 +1,4 @@
-package dev.podder.android.ui.search
+package com.lush1us.podder.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

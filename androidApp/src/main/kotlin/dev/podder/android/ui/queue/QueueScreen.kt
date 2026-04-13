@@ -1,4 +1,4 @@
-package dev.podder.android.ui.queue
+package com.lush1us.podder.ui.queue
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
-import dev.podder.android.queue.QueueEntry
+import com.lush1us.podder.queue.QueueEntry
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
