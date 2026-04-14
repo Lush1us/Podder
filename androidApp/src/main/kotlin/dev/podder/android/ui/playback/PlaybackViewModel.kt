@@ -2,16 +2,20 @@ package com.lush1us.podder.ui.playback
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lush1us.podder.media.MediaControllerManager
 import dev.podder.data.repository.PodcastRepository
 import dev.podder.domain.model.PlaybackState
 import dev.podder.domain.player.PlaybackStateMachine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 data class NowPlayingInfo(
     val episodeId: String,
@@ -25,6 +29,7 @@ data class NowPlayingInfo(
 class PlaybackViewModel(
     private val stateMachine: PlaybackStateMachine,
     private val repository: PodcastRepository,
+    private val controllerManager: MediaControllerManager,
 ) : ViewModel() {
 
     val state: StateFlow<PlaybackState> = stateMachine.state
@@ -64,11 +69,45 @@ class PlaybackViewModel(
 
     fun resumePosition(episodeId: String): Long = stateMachine.resumePosition(episodeId)
 
-    fun play(trackId: String, url: String) = stateMachine.play(trackId, url)
-    fun pause()  = stateMachine.pause()
-    fun resume() = stateMachine.resume()
-    fun stop()   = stateMachine.stop()
-    fun seekTo(positionMs: Long) = stateMachine.seekTo(positionMs)
-    fun setPlaybackSpeed(speed: Float) = stateMachine.setPlaybackSpeed(speed)
+    /**
+     * Initiates playback of a new track. Waits up to 2 s (non-blocking, via coroutine suspension)
+     * for the MediaController to be connected — guaranteeing the service is alive — before
+     * mutating the state machine. Falls back to a direct call if the controller never connects.
+     */
+    fun play(trackId: String, url: String) {
+        viewModelScope.launch {
+            withTimeoutOrNull(2_000L) {
+                while (controllerManager.controller == null) delay(50)
+            }
+            stateMachine.play(trackId, url)
+        }
+    }
+
+    /** Routes through the MediaController so the MediaSession drives ExoPlayer directly. */
+    fun pause() {
+        controllerManager.controller?.pause() ?: stateMachine.pause()
+    }
+
+    /** Routes through the MediaController; falls back to the state machine flag if not connected. */
+    fun resume() {
+        controllerManager.controller?.play() ?: stateMachine.resume()
+    }
+
+    fun stop() = stateMachine.stop()
+
+    /**
+     * Optimistic UI update via the state machine + actual seek via the MediaController.
+     * If the controller is not yet connected, the state machine's pendingSeek path handles it.
+     */
+    fun seekTo(positionMs: Long) {
+        stateMachine.seekTo(positionMs)
+        controllerManager.controller?.seekTo(positionMs)
+    }
+
+    fun setPlaybackSpeed(speed: Float) {
+        stateMachine.setPlaybackSpeed(speed)
+        controllerManager.controller?.setPlaybackSpeed(speed)
+    }
+
     fun setScrubbing(enabled: Boolean) = stateMachine.setScrubbing(enabled)
 }

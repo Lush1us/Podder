@@ -2,23 +2,26 @@ package com.lush1us.podder.ui.episode
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lush1us.podder.media.MediaControllerManager
 import dev.podder.data.repository.EpisodeSummary
 import dev.podder.data.repository.PodcastRepository
 import dev.podder.data.repository.PodcastSummary
 import dev.podder.domain.model.PlaybackState
 import dev.podder.domain.player.PlaybackStateMachine
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 class EpisodeDetailViewModel(
     val episodeId: String,
     private val stateMachine: PlaybackStateMachine,
     private val repository: PodcastRepository,
+    private val controllerManager: MediaControllerManager,
 ) : ViewModel() {
 
     val playbackState: StateFlow<PlaybackState> = stateMachine.state
@@ -46,19 +49,33 @@ class EpisodeDetailViewModel(
         }
     }
 
+    /**
+     * Waits up to 2 s (non-blocking) for the MediaController to connect before mutating the
+     * state machine, ensuring the service is alive before the Buffering state is emitted.
+     */
     fun play() {
         val ep = _episode.value ?: return
-        stateMachine.play(ep.id, ep.url)
+        viewModelScope.launch {
+            withTimeoutOrNull(2_000L) {
+                while (controllerManager.controller == null) delay(50)
+            }
+            stateMachine.play(ep.id, ep.url)
+        }
     }
 
-    fun pause()  = stateMachine.pause()
-    fun resume() = stateMachine.resume()
+    fun pause()  = controllerManager.controller?.pause()  ?: stateMachine.pause()
+    fun resume() = controllerManager.controller?.play()   ?: stateMachine.resume()
 
-    fun seekTo(positionMs: Long) = stateMachine.seekTo(positionMs)
+    fun seekTo(positionMs: Long) {
+        stateMachine.seekTo(positionMs)
+        controllerManager.controller?.seekTo(positionMs)
+    }
+
     fun setScrubbing(enabled: Boolean) = stateMachine.setScrubbing(enabled)
 
     fun setSpeed(speed: Float) {
         _speed.value = speed
         stateMachine.setPlaybackSpeed(speed)
+        controllerManager.controller?.setPlaybackSpeed(speed)
     }
 }

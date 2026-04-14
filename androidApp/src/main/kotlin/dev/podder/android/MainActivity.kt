@@ -1,6 +1,5 @@
 package com.lush1us.podder
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,7 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.lush1us.podder.service.PodderMediaService
+import com.lush1us.podder.media.MediaControllerManager
 import com.lush1us.podder.ui.HomeScreen
 import com.lush1us.podder.ui.theme.PodderTheme
 import dev.podder.data.store.KVStore
@@ -18,6 +17,7 @@ import org.koin.android.ext.android.inject
 class MainActivity : ComponentActivity() {
 
     private val kvStore: KVStore by inject()
+    private val mediaControllerManager: MediaControllerManager by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -35,7 +35,6 @@ class MainActivity : ComponentActivity() {
         }
         splashScreen.setOnExitAnimationListener { it.remove() }
 
-        startService(Intent(this, PodderMediaService::class.java))
         setContent {
             PodderTheme(themeMode = themeMode) {
                 HomeScreen(
@@ -47,5 +46,18 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Binding via MediaController forces the OS to wake PodderMediaService whenever the UI
+        // becomes visible — prevents the lifecycle desync where the service is killed in the
+        // background and the Activity resumes without onCreate() being called again.
+        mediaControllerManager.connect()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mediaControllerManager.release()
     }
 }

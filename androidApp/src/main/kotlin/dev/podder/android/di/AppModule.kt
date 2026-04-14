@@ -25,6 +25,7 @@ import com.lush1us.podder.ui.discover.DiscoverViewModel
 import com.lush1us.podder.ui.podcast.PodcastSettingsViewModel
 import com.lush1us.podder.ui.search.SearchViewModel
 import com.lush1us.podder.ui.settings.SettingsViewModel
+import com.lush1us.podder.media.MediaControllerManager
 import dev.podder.logging.PodderLogger
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -83,6 +84,8 @@ val appModule = module {
     single<PreCacheManager> { PreCacheManager(get(), get(), get<PodderLogger>()) }
     single<QueueRepository> { QueueRepository(get<PodderDatabase>(), get<PodderLogger>()) }
 
+    single<MediaControllerManager> { MediaControllerManager(androidContext()) }
+
     single { JankMonitor(get<PodderLogger>()) }
     single { AnrWatchdog(get<PodderLogger>()) }
 
@@ -97,6 +100,6 @@ val appModule = module {
     viewModelOf(::DiscoverViewModel)
     viewModelOf(::SettingsViewModel)
     viewModel { params -> EpisodeListViewModel(params.get(), get()) }
-    viewModel { params -> EpisodeDetailViewModel(params.get(), get(), get()) }
+    viewModel { params -> EpisodeDetailViewModel(params.get(), get(), get(), get()) }
     viewModel { params -> PodcastSettingsViewModel(params.get(), get()) }
 }
