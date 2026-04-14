@@ -44,7 +44,7 @@ val appModule = module {
         val cacheDir = File(androidContext().cacheDir, "media3-cache")
         SimpleCache(
             cacheDir,
-            LeastRecentlyUsedCacheEvictor(5L * 1024 * 1024 * 1024), // 5 GB
+            LeastRecentlyUsedCacheEvictor(256L * 1024 * 1024), // 256 MB — PreCacheManager only seeds 2 MB/episode
             get<StandaloneDatabaseProvider>(),
         )
     }

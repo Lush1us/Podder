@@ -43,6 +43,10 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.sqldelight.android.driver)
+            implementation(libs.media3.exoplayer)
+            implementation(libs.media3.exoplayer.hls)
+            implementation(libs.media3.session)
+            implementation(libs.media3.common)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

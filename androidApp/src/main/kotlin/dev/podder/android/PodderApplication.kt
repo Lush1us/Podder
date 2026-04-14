@@ -6,9 +6,15 @@ import android.app.NotificationManager
 import android.content.ComponentCallbacks2
 import android.os.SystemClock
 import android.content.res.Configuration
+import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.network.ktor3.KtorNetworkFetcherFactory
+import coil3.request.crossfade
 import com.lush1us.podder.notification.NewEpisodeNotifier
 import com.lush1us.podder.di.appModule
 import com.lush1us.podder.download.DownloadRepository
@@ -83,6 +89,15 @@ class PodderApplication : Application() {
         // 4. Log app created
         appLogger.log(LogLevel.INFO, Subsystem.APP, LogEvent.AppLifecycle.Created)
 
+        // Coil 3 ships no default network fetcher — register the Ktor3 one so remote
+        // artwork actually loads. Reuses the Ktor version already pinned for the app.
+        SingletonImageLoader.setSafe { ctx ->
+            ImageLoader.Builder(ctx)
+                .components { add(KtorNetworkFetcherFactory()) }
+                .crossfade(true)
+                .build()
+        }
+
         // 5. Check for crash context from previous run and upload to dev machine
         CoroutineScope(Dispatchers.IO).launch {
             val crashContext = appLogger.readAndClearCrashContext()
@@ -140,11 +155,17 @@ class PodderApplication : Application() {
         //     database; keep it off the main thread to avoid startup jank.
         val kvStore: KVStore by inject()
         val refreshHours = kvStore.getLong("refresh_interval_hours", 3L)
+        val refreshConstraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.UNMETERED)
+            .setRequiresBatteryNotLow(true)
+            .build()
         CoroutineScope(Dispatchers.IO).launch {
             WorkManager.getInstance(this@PodderApplication).enqueueUniquePeriodicWork(
                 "feed_refresh",
                 ExistingPeriodicWorkPolicy.REPLACE,
-                PeriodicWorkRequestBuilder<RefreshWorker>(refreshHours, TimeUnit.HOURS).build(),
+                PeriodicWorkRequestBuilder<RefreshWorker>(refreshHours, TimeUnit.HOURS)
+                    .setConstraints(refreshConstraints)
+                    .build(),
             )
         }
     }

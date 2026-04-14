@@ -34,8 +34,8 @@ android {
         applicationId = "com.lush1us.podder"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1"
         buildConfigField("String", "PI_API_KEY",    "\"${localProperties["podcastindex.apiKey"] ?: ""}\"")
         buildConfigField("String", "PI_API_SECRET", "\"${localProperties["podcastindex.apiSecret"] ?: ""}\"")
     }
@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.ktor3)
 
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:2.8.5")

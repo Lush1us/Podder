@@ -58,11 +58,15 @@ Java_dev_podder_data_store_KVStore_nativePutString(JNIEnv* env, jobject, jlong h
 JNIEXPORT jstring JNICALL
 Java_dev_podder_data_store_KVStore_nativeGetString(JNIEnv* env, jobject, jlong h, jstring key, jstring def) {
     const char* k = env->GetStringUTFChars(key, nullptr);
-    const char* d = env->GetStringUTFChars(def, nullptr);
-    const char* result = kv_get_string(reinterpret_cast<void*>(h), k, d);
-    jstring jresult = env->NewStringUTF(result);
+    char* owned = kv_get_string_dup(reinterpret_cast<void*>(h), k);
     env->ReleaseStringUTFChars(key, k);
-    env->ReleaseStringUTFChars(def, d);
+    jstring jresult;
+    if (owned) {
+        jresult = env->NewStringUTF(owned);
+        kv_free(owned);
+    } else {
+        jresult = def;
+    }
     return jresult;
 }
 

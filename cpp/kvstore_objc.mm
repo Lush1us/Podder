@@ -28,7 +28,13 @@
 - (void)putFloat:(float)v forKey:(NSString*)k   { kv_put_float(_handle, k.UTF8String, v); }
 - (float)getFloat:(NSString*)k default:(float)d { return kv_get_float(_handle, k.UTF8String, d); }
 - (void)putString:(NSString*)v forKey:(NSString*)k { kv_put_string(_handle, k.UTF8String, v.UTF8String); }
-- (NSString*)getString:(NSString*)k default:(NSString*)d { return @(kv_get_string(_handle, k.UTF8String, d.UTF8String)); }
+- (NSString*)getString:(NSString*)k default:(NSString*)d {
+    char* owned = kv_get_string_dup(_handle, k.UTF8String);
+    if (!owned) return d;
+    NSString* s = [NSString stringWithUTF8String:owned];
+    kv_free(owned);
+    return s ?: d;
+}
 - (void)putBool:(BOOL)v forKey:(NSString*)k     { kv_put_bool(_handle, k.UTF8String, v); }
 - (BOOL)getBool:(NSString*)k default:(BOOL)d    { return kv_get_bool(_handle, k.UTF8String, d); }
 - (void)close { kv_close(_handle); _handle = nullptr; }
