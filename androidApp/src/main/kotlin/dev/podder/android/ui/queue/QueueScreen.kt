@@ -25,15 +25,26 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.draw.alpha
 import coil3.compose.AsyncImage
+import com.lush1us.podder.download.DownloadProgress
+import com.lush1us.podder.network.NetworkObserver
 import com.lush1us.podder.queue.QueueEntry
+import com.lush1us.podder.ui.download.DownloadViewModel
+import com.lush1us.podder.ui.feed.AnimatedDotsBanner
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QueueScreen(onBack: () -> Unit) {
     val vm: QueueViewModel = koinViewModel()
     val queue by vm.queue.collectAsState()
+    val networkObserver = koinInject<NetworkObserver>()
+    val isOffline by networkObserver.isOffline.collectAsState()
+    val downloadVm: DownloadViewModel = koinViewModel()
+    val progressMap by downloadVm.progressMap.collectAsState()
 
     // Drag state — shared across all items so the grabbed item can read it in graphicsLayer.
     // dragOffsetY is only read in the graphicsLayer lambda (draw phase), so it doesn't trigger
@@ -59,12 +70,14 @@ fun QueueScreen(onBack: () -> Unit) {
             )
         }
     ) { padding ->
-        if (queue.isEmpty()) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("Queue is empty", style = MaterialTheme.typography.bodyLarge)
-            }
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            AnimatedVisibility(visible = isOffline) { AnimatedDotsBanner("Offline") }
+            if (queue.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Queue is empty", style = MaterialTheme.typography.bodyLarge)
+                }
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(queue, key = { it.episodeId }) { entry ->
                     val isGrabbed = entry.episodeId == grabbedId
                     val currentQueue = rememberUpdatedState(queue)
@@ -126,14 +139,18 @@ fun QueueScreen(onBack: () -> Unit) {
                                 )
                             },
                     ) {
+                        val entryOfflineDisabled =
+                            isOffline && progressMap[entry.episodeId] !is DownloadProgress.Downloaded
                         QueueEntryRow(
                             entry = entry,
                             onRemove = if (!isGrabbed && grabbedId == null) {
                                 { vm.removeFromQueue(entry.episodeId) }
                             } else null,
+                            disabled = entryOfflineDisabled,
                         )
                         if (!isGrabbed) HorizontalDivider()
                     }
+                }
                 }
             }
         }
@@ -141,10 +158,11 @@ fun QueueScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun QueueEntryRow(entry: QueueEntry, onRemove: (() -> Unit)?) {
+private fun QueueEntryRow(entry: QueueEntry, onRemove: (() -> Unit)?, disabled: Boolean = false) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .alpha(if (disabled) 0.3f else 1f)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -34,8 +34,8 @@ android {
         applicationId = "com.lush1us.podder"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.1.2"
         buildConfigField("String", "PI_API_KEY",    "\"${localProperties["podcastindex.apiKey"] ?: ""}\"")
         buildConfigField("String", "PI_API_SECRET", "\"${localProperties["podcastindex.apiSecret"] ?: ""}\"")
     }

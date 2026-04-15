@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.lush1us.podder.download.DownloadProgress
+import com.lush1us.podder.network.NetworkObserver
 import com.lush1us.podder.queue.QueueEntry
 import com.lush1us.podder.ui.download.DownloadViewModel
 import com.lush1us.podder.ui.playback.PlaybackViewModel
@@ -61,6 +62,7 @@ import dev.podder.domain.model.PlayedFilter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,6 +85,8 @@ fun FeedScreen(
     val filter by vm.filter.collectAsState()
     val isImporting by podcastVm.isImporting.collectAsState()
     val progressMap by downloadVm.progressMap.collectAsState()
+    val networkObserver = koinInject<NetworkObserver>()
+    val isOffline by networkObserver.isOffline.collectAsState()
 
     val context = LocalContext.current
 
@@ -110,6 +114,7 @@ fun FeedScreen(
         modifier     = modifier.fillMaxSize(),
     ) {
         Column(Modifier.fillMaxSize()) {
+            AnimatedVisibility(visible = isOffline) { AnimatedDotsBanner("Offline") }
             AnimatedVisibility(visible = isImporting) { AnimatedDotsBanner("Importing") }
             AnimatedVisibility(visible = isRefreshing) { AnimatedDotsBanner("Refreshing") }
             if (showFilterBar) {
@@ -133,7 +138,11 @@ fun FeedScreen(
                 } else {
                     LazyColumn(state = lazyListState, modifier = Modifier.fillMaxSize()) {
                         items(episodes, key = { it.id }) { episode ->
+                            val progress = progressMap[episode.id]
+                            // Offline + not fully downloaded = strictly disabled (no taps, grayed).
+                            val offlineDisabled = isOffline && progress !is DownloadProgress.Downloaded
                             SwipeableEpisodeRow(
+                                enabled      = !offlineDisabled,
                                 onSwipePlay  = { playbackVm.play(episode.id, episode.url) },
                                 onSwipeQueue = {
                                     queueVm.addToQueue(QueueEntry(
@@ -150,8 +159,9 @@ fun FeedScreen(
                                 FeedEpisodeRow(
                                     episode          = episode,
                                     resumeMs         = playbackVm.resumePosition(episode.id),
-                                    downloadProgress = progressMap[episode.id],
+                                    downloadProgress = progress,
                                     onDownloadClick  = { downloadVm.startDownload(episode.id, episode.url) },
+                                    disabled         = offlineDisabled,
                                 )
                             }
                             HorizontalDivider()
@@ -237,8 +247,14 @@ private fun SwipeableEpisodeRow(
     onSwipePlay: () -> Unit,
     onSwipeQueue: () -> Unit,
     onLongPress: () -> Unit,
+    enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    if (!enabled) {
+        // Offline + not cached: render content with no gesture pipeline so every tap/swipe is inert.
+        Box(modifier = Modifier.fillMaxWidth()) { content() }
+        return
+    }
     val scope   = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
     val density = LocalDensity.current
@@ -412,16 +428,22 @@ private fun FeedEpisodeRow(
     resumeMs: Long,
     downloadProgress: DownloadProgress?,
     onDownloadClick: () -> Unit,
+    disabled: Boolean = false,
 ) {
     val isFinished = episode.playCount > 0
     val subtitleColor = MaterialTheme.colorScheme.onSurfaceVariant
     val artworkSize = if (isFinished) 28.dp else 48.dp
     val vertPadding = if (isFinished) 3.dp else 8.dp
+    val rowAlpha = when {
+        disabled   -> 0.3f
+        isFinished -> 0.4f
+        else       -> 1f
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .alpha(if (isFinished) 0.4f else 1f)
+            .alpha(rowAlpha)
             .padding(horizontal = 12.dp, vertical = vertPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -518,7 +540,7 @@ private fun DownloadIndicator(
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 @Composable
-private fun AnimatedDotsBanner(label: String) {
+internal fun AnimatedDotsBanner(label: String) {
     var dotCount by remember { mutableIntStateOf(1) }
     LaunchedEffect(Unit) {
         while (true) {

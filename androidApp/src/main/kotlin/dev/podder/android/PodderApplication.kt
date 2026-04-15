@@ -25,6 +25,7 @@ import com.lush1us.podder.logging.ContextualExceptionHandler
 import com.lush1us.podder.logging.CrashContextHarvester
 import com.lush1us.podder.logging.CrashUploader
 import com.lush1us.podder.logging.JankMonitor
+import com.lush1us.podder.worker.CacheCleanupWorker
 import com.lush1us.podder.worker.RefreshWorker
 import dev.podder.data.db.DatabaseDriverFactory
 import dev.podder.di.sharedModule
@@ -165,6 +166,21 @@ class PodderApplication : Application() {
                 ExistingPeriodicWorkPolicy.REPLACE,
                 PeriodicWorkRequestBuilder<RefreshWorker>(refreshHours, TimeUnit.HOURS)
                     .setConstraints(refreshConstraints)
+                    .build(),
+            )
+        }
+
+        // 11. Schedule daily cache cleanup — charging + idle only, so it never competes with playback.
+        val cleanupConstraints = Constraints.Builder()
+            .setRequiresCharging(true)
+            .setRequiresDeviceIdle(true)
+            .build()
+        CoroutineScope(Dispatchers.IO).launch {
+            WorkManager.getInstance(this@PodderApplication).enqueueUniquePeriodicWork(
+                "cache_cleanup",
+                ExistingPeriodicWorkPolicy.KEEP,
+                PeriodicWorkRequestBuilder<CacheCleanupWorker>(1, TimeUnit.DAYS)
+                    .setConstraints(cleanupConstraints)
                     .build(),
             )
         }

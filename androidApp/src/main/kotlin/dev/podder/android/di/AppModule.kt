@@ -26,6 +26,7 @@ import com.lush1us.podder.ui.podcast.PodcastSettingsViewModel
 import com.lush1us.podder.ui.search.SearchViewModel
 import com.lush1us.podder.ui.settings.SettingsViewModel
 import com.lush1us.podder.media.MediaControllerManager
+import com.lush1us.podder.network.NetworkObserver
 import dev.podder.logging.PodderLogger
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -44,7 +45,7 @@ val appModule = module {
         val cacheDir = File(androidContext().cacheDir, "media3-cache")
         SimpleCache(
             cacheDir,
-            LeastRecentlyUsedCacheEvictor(256L * 1024 * 1024), // 256 MB — PreCacheManager only seeds 2 MB/episode
+            LeastRecentlyUsedCacheEvictor(256L * 1024 * 1024), // 256 MB — holds full-episode downloads + pre-cache seeds
             get<StandaloneDatabaseProvider>(),
         )
     }
@@ -85,6 +86,8 @@ val appModule = module {
     single<QueueRepository> { QueueRepository(get<PodderDatabase>(), get<PodderLogger>()) }
 
     single<MediaControllerManager> { MediaControllerManager(androidContext()) }
+
+    single<NetworkObserver> { NetworkObserver(androidContext()) }
 
     single { JankMonitor(get<PodderLogger>()) }
     single { AnrWatchdog(get<PodderLogger>()) }

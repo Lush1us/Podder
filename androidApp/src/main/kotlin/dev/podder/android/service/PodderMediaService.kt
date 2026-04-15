@@ -139,8 +139,11 @@ class PodderMediaService : MediaSessionService() {
                                 player.setMediaItem(item, pos)
                                 player.prepare()
                                 player.play()
-                                // CacheDataSource writes to SimpleCache automatically during streaming;
-                                // no need to trigger a parallel DownloadManager download here.
+                                // Kick off a full-episode download in parallel so the file is saved to disk
+                                // even if the user loses network mid-playback. DownloadManager shares the
+                                // same SimpleCache + cache key, so this doesn't double-fetch streamed bytes.
+                                // startAutoCache is idempotent — no-op if a download for this id already exists.
+                                downloadRepository.startAutoCache(trackId, url)
                             }
                         }
                         is PlaybackState.Paused -> player.pause()
@@ -156,32 +159,32 @@ class PodderMediaService : MediaSessionService() {
 
     private fun observePlayer() {
         val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                // During onDestroy we already saved the correct position; ignore
-                // release-triggered callbacks that would overwrite it with garbage.
-                if (releasing) return
-                val current = stateMachine.state.value
-                val trackId = when (current) {
-                    is PlaybackState.Buffering -> current.trackId
-                    is PlaybackState.Playing   -> current.trackId
-                    is PlaybackState.Paused    -> current.trackId
-                    else -> return
-                }
-                if (isPlaying) {
-                    stateMachine.onPlaying(trackId, player.currentPosition, player.duration.coerceAtLeast(0L))
-                    startTicks(trackId)
-                } else {
-                    stopTicks()
-                    // Only report a real pause — not transient stops during seek/buffer
-                    if (player.playbackState != Player.STATE_ENDED && !player.playWhenReady) {
-                        stateMachine.onPaused(trackId, player.currentPosition, player.duration.coerceAtLeast(0L))
-                    }
-                }
-            }
-
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (releasing) return
-                if (playbackState == Player.STATE_ENDED) {
+                when (playbackState) {
+                    Player.STATE_BUFFERING -> {
+                        val trackId = currentOrPendingTrackId() ?: return
+                        stateMachine.onBuffering(trackId)
+                        // Pause DB writes while hardware/network is loading; ticks resume at STATE_READY.
+                        stopTicks()
+                    }
+
+                    Player.STATE_READY -> {
+                        // The gatekeeper — only now does ExoPlayer have a real position/duration,
+                        // so this is the single source of truth for Playing/Paused transitions.
+                        val trackId = currentOrPendingTrackId() ?: return
+                        val pos = player.currentPosition
+                        val dur = player.duration.coerceAtLeast(0L)
+                        if (player.playWhenReady) {
+                            stateMachine.onPlaying(trackId, pos, dur)
+                            startTicks(trackId)
+                        } else {
+                            stateMachine.onPaused(trackId, pos, dur)
+                            stopTicks()
+                        }
+                    }
+
+                    Player.STATE_ENDED -> {
                     val endedTrackId = when (val s = stateMachine.state.value) {
                         is PlaybackState.Playing   -> s.trackId
                         is PlaybackState.Paused    -> s.trackId
@@ -240,6 +243,9 @@ class PodderMediaService : MediaSessionService() {
                             }
                         }
                     }
+                    }
+
+                    else -> Unit // STATE_IDLE — no-op; observed during player.stop()
                 }
             }
 
@@ -286,6 +292,13 @@ class PodderMediaService : MediaSessionService() {
                     stateMachine.consumePendingResume()
                 }
         }
+    }
+
+    private fun currentOrPendingTrackId(): String? = when (val s = stateMachine.state.value) {
+        is PlaybackState.Buffering -> s.trackId
+        is PlaybackState.Playing   -> s.trackId
+        is PlaybackState.Paused    -> s.trackId
+        else -> stateMachine.pendingPlay()?.first
     }
 
     private fun startTicks(trackId: String) {

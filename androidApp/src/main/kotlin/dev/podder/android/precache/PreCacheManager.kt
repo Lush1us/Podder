@@ -21,7 +21,7 @@ class PreCacheManager(
 ) {
     companion object {
         private const val MAX_EPISODES = 20
-        private const val CACHE_BYTES = 2L * 1024L * 1024L // 2 MB ≈ 2 min at 128 kbps
+        private const val CACHE_BYTES = 500L * 1024L // ~30 s at 128 kbps — just enough to cover tap-to-play latency
     }
 
     suspend fun preCacheRecent() = withContext(Dispatchers.IO) {

@@ -16,10 +16,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.draw.alpha
 import coil3.compose.AsyncImage
+import com.lush1us.podder.download.DownloadProgress
+import com.lush1us.podder.network.NetworkObserver
+import com.lush1us.podder.ui.download.DownloadViewModel
+import com.lush1us.podder.ui.feed.AnimatedDotsBanner
 import com.lush1us.podder.ui.playback.formatPlayerTime
 import dev.podder.domain.model.PlaybackState
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 private val SPEEDS = listOf(0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f)
@@ -32,6 +39,11 @@ fun EpisodeDetailScreen(episodeId: String, onBack: () -> Unit) {
     val episode       by vm.episode.collectAsState()
     val podcast       by vm.podcast.collectAsState()
     val speed         by vm.speed.collectAsState()
+    val networkObserver = koinInject<NetworkObserver>()
+    val isOffline    by networkObserver.isOffline.collectAsState()
+    val downloadVm: DownloadViewModel = koinViewModel()
+    val progressMap  by downloadVm.progressMap.collectAsState()
+    val offlineDisabled = isOffline && progressMap[episodeId] !is DownloadProgress.Downloaded
 
     val positionMs = when (val s = playbackState) {
         is PlaybackState.Playing -> s.positionMs
@@ -67,6 +79,9 @@ fun EpisodeDetailScreen(episodeId: String, onBack: () -> Unit) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
+            item {
+                AnimatedVisibility(visible = isOffline) { AnimatedDotsBanner("Offline") }
+            }
             // ── Artwork ──────────────────────────────────────────────────────
             item {
                 AsyncImage(
@@ -138,17 +153,28 @@ fun EpisodeDetailScreen(episodeId: String, onBack: () -> Unit) {
 
             // ── Play / Pause controls ─────────────────────────────────────────
             item {
-                Box(Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .alpha(if (offlineDisabled) 0.3f else 1f),
+                    contentAlignment = Alignment.Center,
+                ) {
                     when {
                         isBuffering && isThisEpisode -> CircularProgressIndicator()
                         isPlaying && isThisEpisode   -> {
-                            IconButton(onClick = { vm.pause() }, modifier = Modifier.size(72.dp)) {
+                            IconButton(
+                                onClick  = { vm.pause() },
+                                enabled  = !offlineDisabled,
+                                modifier = Modifier.size(72.dp),
+                            ) {
                                 Icon(Icons.Default.Pause, contentDescription = "Pause", modifier = Modifier.size(48.dp))
                             }
                         }
                         else -> {
                             IconButton(
-                                onClick = { if (isThisEpisode) vm.resume() else vm.play() },
+                                onClick  = { if (isThisEpisode) vm.resume() else vm.play() },
+                                enabled  = !offlineDisabled,
                                 modifier = Modifier.size(72.dp),
                             ) {
                                 Icon(Icons.Default.PlayArrow, contentDescription = "Play", modifier = Modifier.size(48.dp))

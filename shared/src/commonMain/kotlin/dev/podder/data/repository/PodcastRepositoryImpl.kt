@@ -244,7 +244,7 @@ class PodcastRepositoryImpl(
     }
 
     override suspend fun markEpisodeFinished(episodeId: String) = withContext(Dispatchers.IO) {
-        db.episodesQueries.incrementPlayCount(episodeId)
+        db.episodesQueries.markFinished(platformNowUtcEpoch(), episodeId)
     }
 
     override suspend fun nextEpisodeInFeed(currentEpisodeId: String): FeedEpisode? =

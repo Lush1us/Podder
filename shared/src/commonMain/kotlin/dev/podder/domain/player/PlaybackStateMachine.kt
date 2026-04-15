@@ -8,14 +8,17 @@ import dev.podder.logging.PodderLogger
 import dev.podder.logging.Subsystem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 private const val KEY_RESUME_ID  = "playback_resume_id"
 private const val KEY_RESUME_POS = "playback_resume_pos"
+private const val BUFFERING_TIMEOUT_MS = 10_000L
 
 class PlaybackStateMachine(
     private val kvStore: KVStore,
@@ -41,6 +44,8 @@ class PlaybackStateMachine(
     private val _pendingResume = MutableStateFlow(false)
     val pendingResume: StateFlow<Boolean> = _pendingResume.asStateFlow()
 
+    private var bufferingTimeoutJob: Job? = null
+
     private fun stateName(s: PlaybackState): String = when (s) {
         is PlaybackState.Idle      -> "Idle"
         is PlaybackState.Buffering -> "Buffering"
@@ -60,9 +65,20 @@ class PlaybackStateMachine(
     fun onBuffering(trackId: String) {
         transition(trackId, "Buffering")
         _state.value = PlaybackState.Buffering(trackId)
+        // Safety net — if ExoPlayer stays in STATE_BUFFERING with no resolution
+        // (e.g. dead network, corrupt cache), escape to Error so the spinner dies.
+        bufferingTimeoutJob?.cancel()
+        bufferingTimeoutJob = scope.launch {
+            delay(BUFFERING_TIMEOUT_MS)
+            val now = _state.value
+            if (now is PlaybackState.Buffering && now.trackId == trackId) {
+                onError(trackId, "Buffering timeout — no data for ${BUFFERING_TIMEOUT_MS / 1000}s")
+            }
+        }
     }
 
     fun onPlaying(trackId: String, positionMs: Long, durationMs: Long) {
+        bufferingTimeoutJob?.cancel()
         val prev = _state.value
         if (prev !is PlaybackState.Playing) {
             transition(trackId, "Playing")
@@ -73,6 +89,7 @@ class PlaybackStateMachine(
     }
 
     fun onPaused(trackId: String, positionMs: Long, durationMs: Long) {
+        bufferingTimeoutJob?.cancel()
         transition(trackId, "Paused")
         logger.log(LogLevel.INFO, Subsystem.PLAYBACK,
             LogEvent.Playback.Paused(trackId, positionMs))
@@ -81,6 +98,7 @@ class PlaybackStateMachine(
     }
 
     fun onError(trackId: String, message: String) {
+        bufferingTimeoutJob?.cancel()
         transition(trackId, "Error")
         logger.log(LogLevel.ERROR, Subsystem.PLAYBACK,
             LogEvent.Playback.Error(trackId, message))
@@ -88,6 +106,7 @@ class PlaybackStateMachine(
     }
 
     fun onStopped() {
+        bufferingTimeoutJob?.cancel()
         val current = _state.value
         val trackId = when (current) {
             is PlaybackState.Playing   -> current.trackId
@@ -137,8 +156,7 @@ class PlaybackStateMachine(
         pendingPos = startPositionMs
         // Defensive: clear scrubbing in case a previous gesture was interrupted mid-scrub
         _scrubbing.value = false
-        transition(trackId, "Buffering")
-        _state.value = PlaybackState.Buffering(trackId)
+        onBuffering(trackId)
     }
 
     fun pause() {
