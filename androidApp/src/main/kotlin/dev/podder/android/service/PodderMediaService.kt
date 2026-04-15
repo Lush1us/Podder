@@ -249,6 +249,21 @@ class PodderMediaService : MediaSessionService() {
                 }
             }
 
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (releasing) return
+                if (player.playbackState != Player.STATE_READY) return
+                val trackId = currentOrPendingTrackId() ?: return
+                val pos = player.currentPosition
+                val dur = player.duration.coerceAtLeast(0L)
+                if (isPlaying) {
+                    stateMachine.onPlaying(trackId, pos, dur)
+                    startTicks(trackId)
+                } else {
+                    stateMachine.onPaused(trackId, pos, dur)
+                    stopTicks()
+                }
+            }
+
             override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                 if (releasing) return
                 val trackId = (stateMachine.state.value as? PlaybackState.Buffering)?.trackId
